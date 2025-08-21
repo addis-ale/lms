@@ -17,6 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 type FieldName = "email" | "password";
 const formFields: Array<{
   name: FieldName;
@@ -43,6 +46,9 @@ const formSchema = z.object({
 });
 
 export const SignInView = () => {
+  const router = useRouter();
+  const [error, setError] = useState<null | string>(null);
+  const [pending, setPending] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,8 +56,46 @@ export const SignInView = () => {
       password: "",
     },
   });
+
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
+    setError(null);
+    setPending(true);
+    authClient.signIn.email(
+      {
+        email: data.email,
+        password: data.email,
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
+          setPending(false);
+          router.push("/");
+        },
+        onError: ({ error }) => {
+          setError(error.message);
+          setPending(false);
+        },
+      }
+    );
+  };
+  const onSocial = (provider: "google" | "github") => {
+    setError(null);
+    setPending(true);
+    authClient.signIn.social(
+      {
+        provider: provider,
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
+          setPending(false);
+        },
+        onError: ({ error }) => {
+          setError(error.message);
+          setPending(false);
+        },
+      }
+    );
   };
   return (
     <div className="flex flex-col gap-6">
@@ -87,13 +131,13 @@ export const SignInView = () => {
                   </div>
                 ))}
 
-                {true && (
+                {error && (
                   <Alert className="bg-destructive/10 border-none">
                     <OctagonAlert className="h-4 w-4 !text-destructive" />
-                    <AlertTitle>Error</AlertTitle>
+                    <AlertTitle>{error}</AlertTitle>
                   </Alert>
                 )}
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={pending}>
                   Sign Up
                 </Button>
                 <div className=" relative text-center text-sm after:flex after:items-center after:absolute after:inset-0 after:top-1/2 after:border-border after:border-t after:z-0">
@@ -102,10 +146,22 @@ export const SignInView = () => {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Button variant={"outline"} type="button" className="w-full">
+                  <Button
+                    variant={"outline"}
+                    type="button"
+                    className="w-full"
+                    onClick={() => onSocial("google")}
+                    disabled={pending}
+                  >
                     <FaGoogle />
                   </Button>
-                  <Button variant={"outline"} type="button" className="w-full">
+                  <Button
+                    variant={"outline"}
+                    type="button"
+                    className="w-full"
+                    onClick={() => onSocial("github")}
+                    disabled={pending}
+                  >
                     <FaGithub />
                   </Button>
                 </div>
