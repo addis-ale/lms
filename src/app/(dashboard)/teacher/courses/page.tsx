@@ -1,5 +1,7 @@
+import { CourseView } from "@/app/modules/courses/ui/views/courses-view";
+
 const CoursePage = () => {
-  return <div>course page</div>;
+  return <CourseView />;
 };
 
 export default CoursePage;

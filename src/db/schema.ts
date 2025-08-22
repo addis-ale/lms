@@ -1,5 +1,11 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
-
+import { nanoid } from "nanoid";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  numeric,
+} from "drizzle-orm/pg-core";
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -58,4 +64,40 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updated_at").$defaultFn(
     () => /* @__PURE__ */ new Date()
   ),
+});
+export const courses = pgTable("courses", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => nanoid()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  price: numeric("price", { precision: 10, scale: 2 }),
+  isPublished: boolean("is_published").default(false),
+  categoryId: text("category_id").references(() => category.id, {
+    onDelete: "cascade",
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+export const category = pgTable("category", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => nanoid()),
+  name: text("name").notNull().unique(),
+});
+export const attachments = pgTable("attachments", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => nanoid()),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  courseId: text("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
 });
