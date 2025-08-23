@@ -1,4 +1,4 @@
-import { CreateCourseView } from "@/app/modules/create/ui/views/create-course-view";
+import { CreateCourseView } from "@/app/modules/courses/ui/views/create-course-view";
 
 const Createpage = () => {
   return <CreateCourseView />;
