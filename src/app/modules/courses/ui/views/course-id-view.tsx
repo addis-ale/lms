@@ -1,11 +1,13 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { LayoutDashboardIcon } from "lucide-react";
 import { TitleForm } from "../components/title-form";
 import { DescriptionForm } from "../components/description-form";
 import { ImageForm } from "../components/image-form";
+import { CategoryForm } from "../components/category-form";
+import { CategoryGetOne } from "../../types";
 
 interface Props {
   courseId: string;
@@ -15,6 +17,19 @@ export const CourseIdView = ({ courseId }: Props) => {
   const { data } = useSuspenseQuery(
     trpc.courses.getOne.queryOptions({ id: courseId })
   );
+  const { data: categories } = useQuery(
+    trpc.courses.getManyCategory.queryOptions()
+  );
+  const requiredFields = [
+    data.title,
+    data.description,
+    data.imageUrl,
+    data.price,
+    data.categoryId,
+  ];
+  const totalFields = requiredFields.length;
+  const completedFields = requiredFields.filter(Boolean).length;
+  const completionText = `(${completedFields}/${totalFields})`;
   const initialTitleData = {
     title: data?.title,
   };
@@ -24,12 +39,17 @@ export const CourseIdView = ({ courseId }: Props) => {
   const initalImageData = {
     imageUrl: data?.imageUrl ?? "",
   };
+  const initialCatData = {
+    categoryId: data?.categoryId ?? "",
+  };
   return (
     <div className="p-6 mt-8">
       <div className="flex flex-col space-y-8">
         <div>
           <h1 className="text-2xl font-bold">Course setup</h1>
-          <p className="text-sm text-muted-foreground">Complete all fields</p>
+          <p className="text-sm text-muted-foreground">
+            Complete all fields {completionText}
+          </p>
         </div>
         <div className="flex flex-col gap-y-4">
           <div className="flex items-center gap-x-2">
@@ -45,6 +65,14 @@ export const CourseIdView = ({ courseId }: Props) => {
               courseId={courseId}
             />
             <ImageForm initialData={initalImageData} courseId={courseId} />
+            <CategoryForm
+              initialData={initialCatData}
+              courseId={courseId}
+              options={(categories || [])?.map((cat: CategoryGetOne) => ({
+                label: cat.name,
+                value: cat.id,
+              }))}
+            />
           </div>
         </div>
       </div>
