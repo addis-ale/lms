@@ -5,6 +5,7 @@ import { useTRPC } from "@/trpc/client";
 import { LayoutDashboardIcon } from "lucide-react";
 import { TitleForm } from "../components/title-form";
 import { DescriptionForm } from "../components/description-form";
+import { ImageForm } from "../components/image-form";
 
 interface Props {
   courseId: string;
@@ -19,6 +20,9 @@ export const CourseIdView = ({ courseId }: Props) => {
   };
   const initialDescData = {
     description: data?.description ?? "",
+  };
+  const initalImageData = {
+    imageUrl: data?.imageUrl ?? "",
   };
   return (
     <div className="p-6 mt-8">
@@ -40,6 +44,7 @@ export const CourseIdView = ({ courseId }: Props) => {
               initialData={initialDescData}
               courseId={courseId}
             />
+            <ImageForm initialData={initalImageData} courseId={courseId} />
           </div>
         </div>
       </div>
