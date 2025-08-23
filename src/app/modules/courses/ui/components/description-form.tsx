@@ -27,7 +27,6 @@ interface Props {
 }
 
 export const DescriptionForm = ({ initialData, courseId }: Props) => {
-  console.log(!!initialData?.description);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [openEdit, setOpenEdit] = useState(false);
@@ -38,7 +37,6 @@ export const DescriptionForm = ({ initialData, courseId }: Props) => {
     },
   });
   const onSubmit = (data: z.infer<typeof descriptionInsertSchema>) => {
-    console.log(data);
     updateCourse.mutate({ ...data, id: courseId });
 
     // createCourse.mutate(data);
