@@ -11,3 +11,6 @@ export const descriptionInsertSchema = z.object({
 export const imageUrlInsertSchema = z.object({
   imageUrl: z.string().min(1, { message: "imageUrl is required" }),
 });
+export const categoryInsertSchema = z.object({
+  categoryId: z.string().min(1, { message: "imageUrl is required" }),
+});

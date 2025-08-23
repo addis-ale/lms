@@ -17,13 +17,11 @@ interface Props {
 }
 
 export const ImageForm = ({ initialData, courseId }: Props) => {
-  console.log(!!initialData?.imageUrl);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [openEdit, setOpenEdit] = useState(false);
 
   const onSubmit = (data: z.infer<typeof imageUrlInsertSchema>) => {
-    console.log(data);
     updateCourse.mutate({ ...data, id: courseId });
   };
 
@@ -107,7 +105,6 @@ export const ImageForm = ({ initialData, courseId }: Props) => {
               endpoint="courseImage"
               onChange={(url) => {
                 if (url) {
-                  console.log("url", url);
                   onSubmit({ imageUrl: url });
                 }
               }}

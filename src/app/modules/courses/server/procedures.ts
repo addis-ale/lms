@@ -1,9 +1,13 @@
 import { db } from "@/db";
-import { courses } from "@/db/schema";
-import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { category, courses } from "@/db/schema";
+import {
+  baseProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from "@/trpc/init";
 import { titleInsertSchema } from "../schema";
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 export const coursesRoute = createTRPCRouter({
   update: protectedProcedure
@@ -13,6 +17,7 @@ export const coursesRoute = createTRPCRouter({
         title: z.string().optional(),
         description: z.string().optional(),
         imageUrl: z.string().optional(),
+        categoryId: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -48,6 +53,33 @@ export const coursesRoute = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found" });
       }
       return existedCourse;
+    }),
+  getManyCategory: baseProcedure.query(async () => {
+    const categories = await db
+      .select()
+      .from(category)
+      .orderBy(asc(category.name));
+
+    return categories;
+  }),
+  getOneCategory: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const [courseCategory] = await db
+        .select()
+        .from(category)
+        .where(and(eq(category.id, input.id)));
+      if (!courseCategory) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No category found",
+        });
+      }
+      return courseCategory;
     }),
   create: protectedProcedure
     .input(titleInsertSchema)
