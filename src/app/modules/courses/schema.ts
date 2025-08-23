@@ -8,6 +8,6 @@ export const corseTitleUpdateSchema = titleInsertSchema.extend({
 export const descriptionInsertSchema = z.object({
   description: z.string().min(1, { message: "Description is required" }),
 });
-export const courseDescriptionUpdateSchema = descriptionInsertSchema.extend({
-  id: z.string().min(1, { message: "Id is required" }),
+export const imageUrlInsertSchema = z.object({
+  imageUrl: z.string().min(1, { message: "imageUrl is required" }),
 });
