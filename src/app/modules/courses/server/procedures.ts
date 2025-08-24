@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { category, courses } from "@/db/schema";
+import { attachments, category, courses } from "@/db/schema";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -7,7 +7,7 @@ import {
 } from "@/trpc/init";
 import { titleInsertSchema } from "../schema";
 import { z } from "zod";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 export const coursesRoute = createTRPCRouter({
   update: protectedProcedure
@@ -81,6 +81,92 @@ export const coursesRoute = createTRPCRouter({
         });
       }
       return courseCategory;
+    }),
+  getCourseAttachments: baseProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const courseAttachements = await db
+        .select()
+        .from(attachments)
+        .where(eq(attachments.courseId, input.courseId))
+        .orderBy(desc(attachments.name));
+      return courseAttachements;
+    }),
+  createAttachments: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        name: z.string(),
+        url: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [course] = await db
+        .select({
+          userId: courses.userId,
+        })
+        .from(courses)
+        .where(
+          and(
+            eq(courses.id, input.courseId),
+            eq(courses.userId, ctx.auth.user.id)
+          )
+        );
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+      const [createdAttachment] = await db
+        .insert(attachments)
+        .values({
+          courseId: input.courseId,
+          name: input.name,
+          url: input.url,
+        })
+        .returning();
+      return createdAttachment;
+    }),
+  removeAttachment: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [attachment] = await db
+        .select({
+          courseId: attachments.courseId,
+        })
+        .from(attachments)
+        .where(eq(attachments.id, input.id));
+      if (!attachment) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Attachment not found",
+        });
+      }
+      const [course] = await db
+        .select({
+          userId: courses.userId,
+        })
+        .from(courses)
+        .where(
+          and(
+            eq(courses.id, attachment.courseId),
+            eq(courses.userId, ctx.auth.user.id)
+          )
+        );
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+      const [removed] = await db
+        .delete(attachments)
+        .where(eq(attachments.id, input.id))
+        .returning();
+      return removed;
     }),
   create: protectedProcedure
     .input(titleInsertSchema)

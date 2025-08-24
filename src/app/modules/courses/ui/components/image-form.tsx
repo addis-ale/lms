@@ -36,7 +36,7 @@ export const ImageForm = ({ initialData, courseId }: Props) => {
             trpc.courses.getOne.queryOptions({ id: courseId })
           );
         setOpenEdit(false);
-        toast.success("Course description updated!");
+        toast.success("Course cover image updated!");
       },
       onError: (error) => {
         toast.error(error.message);
@@ -49,7 +49,7 @@ export const ImageForm = ({ initialData, courseId }: Props) => {
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-md">Course Description</h3>
+            <h3 className="font-semibold text-md">Course Cover Image</h3>
             {openEdit && (
               <Button
                 variant={"outline"}
