@@ -16,27 +16,28 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { descriptionInsertSchema } from "../../schema";
 import { useTRPC } from "@/trpc/client";
-import { Textarea } from "@/components/ui/textarea";
+import { priceInsertSchema } from "../../schema";
+import { Input } from "@/components/ui/input";
+import { formatPrice } from "@/lib/format";
 interface Props {
   initialData?: {
-    description: string;
+    price: string;
   };
   courseId: string;
 }
 
-export const DescriptionForm = ({ initialData, courseId }: Props) => {
+export const PriceForm = ({ initialData, courseId }: Props) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [openEdit, setOpenEdit] = useState(false);
-  const form = useForm<z.infer<typeof descriptionInsertSchema>>({
-    resolver: zodResolver(descriptionInsertSchema),
+  const form = useForm<z.infer<typeof priceInsertSchema>>({
+    resolver: zodResolver(priceInsertSchema),
     defaultValues: {
-      description: initialData?.description ?? "",
+      price: initialData?.price ?? "",
     },
   });
-  const onSubmit = (data: z.infer<typeof descriptionInsertSchema>) => {
+  const onSubmit = (data: z.infer<typeof priceInsertSchema>) => {
     updateCourse.mutate({ ...data, id: courseId });
 
     // createCourse.mutate(data);
@@ -53,7 +54,7 @@ export const DescriptionForm = ({ initialData, courseId }: Props) => {
             trpc.courses.getOne.queryOptions({ id: courseId })
           );
         setOpenEdit(false);
-        toast.success("Course description updated!");
+        toast.success("Course price updated!");
       },
       onError: (error) => {
         toast.error(error.message);
@@ -66,7 +67,7 @@ export const DescriptionForm = ({ initialData, courseId }: Props) => {
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-md">Course Description</h3>
+            <h3 className="font-semibold text-md">Course Price</h3>
             {openEdit ? (
               <Button
                 variant={"outline"}
@@ -88,13 +89,13 @@ export const DescriptionForm = ({ initialData, courseId }: Props) => {
           </div>
           {!openEdit && (
             <div>
-              {!!initialData?.description ? (
+              {!!initialData?.price ? (
                 <span className="text-muted-foreground text-md">
-                  {initialData?.description}
+                  {formatPrice(Number(initialData?.price))}
                 </span>
               ) : (
                 <span className="text-muted-foreground text-md italic">
-                  No Description
+                  No Price
                 </span>
               )}
             </div>
@@ -104,15 +105,17 @@ export const DescriptionForm = ({ initialData, courseId }: Props) => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
-                name="description"
+                name="price"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Course Description</FormLabel>
+                    <FormLabel>Course Price</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <Input
+                        type="number"
+                        step={"0.01"}
                         className="bg-white"
-                        placeholder="e.g. This course is about..."
+                        placeholder="Set a price for your course"
                         {...field}
                       />
                     </FormControl>

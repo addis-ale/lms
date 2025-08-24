@@ -114,7 +114,7 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="max-w-xl space-y-4"
+                className="space-y-4"
               >
                 <FormField
                   name="title"
