@@ -14,3 +14,6 @@ export const imageUrlInsertSchema = z.object({
 export const categoryInsertSchema = z.object({
   categoryId: z.string().min(1, { message: "imageUrl is required" }),
 });
+export const priceInsertSchema = z.object({
+  price: z.string(),
+});

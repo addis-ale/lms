@@ -105,10 +105,7 @@ export const CategoryForm = ({ initialData, courseId, options }: Props) => {
         </div>
         {openEdit && (
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="max-w-xl space-y-4"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 name="categoryId"
                 control={form.control}
