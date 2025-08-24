@@ -18,6 +18,7 @@ export const coursesRoute = createTRPCRouter({
         description: z.string().optional(),
         imageUrl: z.string().optional(),
         categoryId: z.string().optional(),
+        price: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
