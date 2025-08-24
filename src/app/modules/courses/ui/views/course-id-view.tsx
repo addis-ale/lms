@@ -2,13 +2,20 @@
 
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
-import { CircleDollarSign, LayoutDashboardIcon, ListCheck } from "lucide-react";
+import {
+  CircleDollarSign,
+  File,
+  LayoutDashboardIcon,
+  ListCheck,
+} from "lucide-react";
 import { TitleForm } from "../components/title-form";
 import { DescriptionForm } from "../components/description-form";
 import { ImageForm } from "../components/image-form";
 import { CategoryForm } from "../components/category-form";
 import { CategoryGetOne } from "../../types";
 import { PriceForm } from "../components/price-form";
+import { IconBadge } from "../components/icon-badge";
+import { AttachmentForm } from "../components/attachment-form";
 
 interface Props {
   courseId: string;
@@ -20,6 +27,11 @@ export const CourseIdView = ({ courseId }: Props) => {
   );
   const { data: categories } = useQuery(
     trpc.courses.getManyCategory.queryOptions()
+  );
+  const { data: courseAttachments } = useQuery(
+    trpc.courses.getCourseAttachments.queryOptions({
+      courseId: courseId,
+    })
   );
   const requiredFields = [
     data.title,
@@ -46,6 +58,11 @@ export const CourseIdView = ({ courseId }: Props) => {
   const initialPriceData = {
     price: data?.price ?? "",
   };
+  const initialCourseAttachmentData = courseAttachments?.map((attachment) => ({
+    url: attachment?.url,
+    name: attachment?.name,
+    id: attachment?.id,
+  }));
   return (
     <div className="p-6 mt-8">
       <div className="flex flex-col space-y-8">
@@ -57,12 +74,10 @@ export const CourseIdView = ({ courseId }: Props) => {
         </div>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="flex flex-col gap-y-4">
-            <div className="flex items-center gap-x-2">
-              <span className="p-2 bg-blue-400/30 rounded-full">
-                <LayoutDashboardIcon className="size-5" />
-              </span>
-              <h2 className="text-xl font-semibold">Customize your course</h2>
-            </div>
+            <IconBadge
+              icon={LayoutDashboardIcon}
+              title={"Customize your course"}
+            />
             <div className=" flex flex-col space-y-4">
               <TitleForm courseId={courseId} initialData={initialTitleData} />
               <DescriptionForm
@@ -82,12 +97,7 @@ export const CourseIdView = ({ courseId }: Props) => {
           </div>
           <div className="flex flex-col gap-y-6">
             <div>
-              <div className="flex items-center gap-x-2">
-                <span className="p-2 bg-blue-400/30 rounded-full">
-                  <ListCheck className="size-5" />
-                </span>
-                <h2 className="text-xl font-semibold">Course chapters</h2>
-              </div>
+              <IconBadge icon={ListCheck} title={"Course chapters"} />
               <div>TODO</div>
             </div>
             <div className="flex flex-col gap-y-4">
@@ -98,6 +108,20 @@ export const CourseIdView = ({ courseId }: Props) => {
                 <h2 className="text-xl font-semibold">Sell your course</h2>
               </div>
               <PriceForm initialData={initialPriceData} courseId={courseId} />
+            </div>
+            <div className="flex flex-col gap-y-4">
+              <div className="flex items-center gap-x-2">
+                <span className="p-2 bg-blue-400/30 rounded-full">
+                  <File className="size-5" />
+                </span>
+                <h2 className="text-xl font-semibold">
+                  Resources & Attachments
+                </h2>
+              </div>
+              <AttachmentForm
+                initialData={initialCourseAttachmentData || []}
+                courseId={courseId}
+              />
             </div>
           </div>
         </div>

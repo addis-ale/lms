@@ -17,3 +17,6 @@ export const categoryInsertSchema = z.object({
 export const priceInsertSchema = z.object({
   price: z.string(),
 });
+export const attachmentsInsertSchema = z.object({
+  url: z.string(),
+});
