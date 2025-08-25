@@ -5,6 +5,8 @@ import {
   timestamp,
   boolean,
   numeric,
+  integer,
+  unique,
 } from "drizzle-orm/pg-core";
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -100,4 +102,75 @@ export const attachments = pgTable("attachments", {
   courseId: text("course_id")
     .notNull()
     .references(() => courses.id, { onDelete: "cascade" }),
+});
+export const chapters = pgTable("chapters", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => nanoid()),
+  title: text("title").notNull(),
+  description: text("description"),
+  videoUrl: text("video_url"),
+  position: integer("position"),
+  isPublished: boolean("is_published").default(false),
+  isFree: boolean("is_free").default(false),
+  courseId: text("course_id")
+    .notNull()
+    .references(() => courses.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const muxData = pgTable("muxData", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => nanoid()),
+  assetId: text("asset_id").notNull(),
+  playbackId: text("playback_id"),
+  chapterId: text("chapter_id")
+    .notNull()
+    .unique()
+    .references(() => chapters.id, { onDelete: "cascade" }),
+});
+
+export const userProgress = pgTable(
+  "userProgress",
+  {
+    id: text("id")
+      .primaryKey()
+      .$default(() => nanoid()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    chapterId: text("chapter_id")
+      .notNull()
+      .references(() => chapters.id, { onDelete: "cascade" }),
+    isCompleted: boolean("is_completed").default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.userId, table.chapterId)]
+);
+export const purchase = pgTable(
+  "purchases",
+  {
+    id: text("id")
+      .primaryKey()
+      .$default(() => nanoid()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    courseId: text("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+  },
+  (table) => [unique().on(table.userId, table.courseId)]
+);
+export const StripeCustomer = pgTable("stripeCustomers", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => nanoid()),
+  userId: text("user_id").notNull().unique(),
+  stripeCustomerId: text("stripe_customer_id").notNull().unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
