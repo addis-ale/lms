@@ -101,23 +101,11 @@ export const CourseIdView = ({ courseId }: Props) => {
               <div>TODO</div>
             </div>
             <div className="flex flex-col gap-y-4">
-              <div className="flex items-center gap-x-2">
-                <span className="p-2 bg-blue-400/30 rounded-full">
-                  <CircleDollarSign className="size-5" />
-                </span>
-                <h2 className="text-xl font-semibold">Sell your course</h2>
-              </div>
+              <IconBadge icon={CircleDollarSign} title="Sell your course" />
               <PriceForm initialData={initialPriceData} courseId={courseId} />
             </div>
             <div className="flex flex-col gap-y-4">
-              <div className="flex items-center gap-x-2">
-                <span className="p-2 bg-blue-400/30 rounded-full">
-                  <File className="size-5" />
-                </span>
-                <h2 className="text-xl font-semibold">
-                  Resources & Attachments
-                </h2>
-              </div>
+              <IconBadge icon={File} title="Resources & Attachments" />
               <AttachmentForm
                 initialData={initialCourseAttachmentData || []}
                 courseId={courseId}
