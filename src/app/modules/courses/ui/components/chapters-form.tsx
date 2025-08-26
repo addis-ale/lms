@@ -58,6 +58,7 @@ export const ChaptersForm = ({ initialData, courseId }: Props) => {
             trpc.courses.getCourseChapters.queryOptions({ courseId: courseId })
           );
         toggleCreating();
+        form.reset();
         toast.success("Course chapter created!");
       },
       onError: (error) => {
