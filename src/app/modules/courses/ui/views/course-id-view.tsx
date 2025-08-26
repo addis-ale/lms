@@ -72,6 +72,9 @@ export const CourseIdView = ({ courseId }: Props) => {
   }));
   const initialChaptersData = courseChapters?.map((chapter) => ({
     title: chapter.title,
+    id: chapter.id,
+    isPublished: chapter?.isPublished ?? false,
+    isFree: chapter?.isFree ?? false,
   }));
   return (
     <div className="p-6 mt-8">
@@ -109,7 +112,7 @@ export const CourseIdView = ({ courseId }: Props) => {
             <div className="flex flex-col gap-y-4">
               <IconBadge icon={ListCheck} title={"Course chapters"} />
               <ChaptersForm
-                initialData={initialChaptersData}
+                initialData={initialChaptersData || []}
                 courseId={courseId}
               />
             </div>
