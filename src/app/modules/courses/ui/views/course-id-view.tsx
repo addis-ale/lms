@@ -16,6 +16,7 @@ import { CategoryGetOne } from "../../types";
 import { PriceForm } from "../components/price-form";
 import { IconBadge } from "../components/icon-badge";
 import { AttachmentForm } from "../components/attachment-form";
+import { ChaptersForm } from "../components/chapters-form";
 
 interface Props {
   courseId: string;
@@ -33,12 +34,18 @@ export const CourseIdView = ({ courseId }: Props) => {
       courseId: courseId,
     })
   );
+  const { data: courseChapters } = useQuery(
+    trpc.courses.getCourseChapters.queryOptions({
+      courseId: courseId,
+    })
+  );
   const requiredFields = [
     data.title,
     data.description,
     data.imageUrl,
     data.price,
     data.categoryId,
+    courseChapters?.some((chapter) => chapter.isPublished),
   ];
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter(Boolean).length;
@@ -62,6 +69,9 @@ export const CourseIdView = ({ courseId }: Props) => {
     url: attachment?.url,
     name: attachment?.name,
     id: attachment?.id,
+  }));
+  const initialChaptersData = courseChapters?.map((chapter) => ({
+    title: chapter.title,
   }));
   return (
     <div className="p-6 mt-8">
@@ -96,9 +106,12 @@ export const CourseIdView = ({ courseId }: Props) => {
             </div>
           </div>
           <div className="flex flex-col gap-y-6">
-            <div>
+            <div className="flex flex-col gap-y-4">
               <IconBadge icon={ListCheck} title={"Course chapters"} />
-              <div>TODO</div>
+              <ChaptersForm
+                initialData={initialChaptersData}
+                courseId={courseId}
+              />
             </div>
             <div className="flex flex-col gap-y-4">
               <IconBadge icon={CircleDollarSign} title="Sell your course" />
