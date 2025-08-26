@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { attachments, category, courses } from "@/db/schema";
+import { attachments, category, chapters, courses } from "@/db/schema";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -32,7 +32,7 @@ export const coursesRoute = createTRPCRouter({
       if (!updatedCourse) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Agent not found",
+          message: "Course not found",
         });
       }
       return updatedCourse;
@@ -81,6 +81,61 @@ export const coursesRoute = createTRPCRouter({
         });
       }
       return courseCategory;
+    }),
+  createCourseChapter: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        title: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const [course] = await db
+        .select({
+          userId: courses.userId,
+        })
+        .from(courses)
+        .where(
+          and(
+            eq(courses.id, input.courseId),
+            eq(courses.userId, ctx.auth.user.id)
+          )
+        );
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+      const [lastChapter] = await db
+        .select({
+          position: chapters.position,
+        })
+        .from(chapters)
+        .where(eq(chapters.courseId, input.courseId))
+        .orderBy(desc(chapters.position))
+        .limit(1);
+      const newPosition = lastChapter ? lastChapter?.position ?? 0 + 1 : 1;
+      const [createdChapter] = await db
+        .insert(chapters)
+        .values({
+          title: input.title,
+          courseId: input.courseId,
+          position: newPosition,
+        })
+        .returning();
+      return createdChapter;
+    }),
+  getCourseChapters: baseProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const courseChapters = await db
+        .select()
+        .from(chapters)
+        .where(eq(chapters.courseId, input.courseId))
+        .orderBy(desc(chapters.position));
+      return courseChapters;
     }),
   getCourseAttachments: baseProcedure
     .input(
