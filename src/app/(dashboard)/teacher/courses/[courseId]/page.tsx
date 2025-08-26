@@ -14,12 +14,12 @@ const Page = async ({ params }: Props) => {
     void queryClient.prefetchQuery(
       trpc.courses.getOne.queryOptions({ id: courseId })
     ),
-    void queryClient.prefetchQuery(trpc.courses.getManyCategory.queryOptions()),
+    void queryClient.prefetchQuery(trpc.categories.getMany.queryOptions()),
     void queryClient.prefetchQuery(
-      trpc.courses.getCourseAttachments.queryOptions({ courseId })
+      trpc.attachments.getMany.queryOptions({ courseId })
     ),
     void queryClient.prefetchQuery(
-      trpc.courses.getCourseChapters.queryOptions({ courseId })
+      trpc.chapters.getMany.queryOptions({ courseId })
     ),
   ]);
 
