@@ -10,9 +10,19 @@ interface Props {
 const Page = async ({ params }: Props) => {
   const { courseId } = await params;
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(
-    trpc.courses.getOne.queryOptions({ id: courseId })
-  );
+  await Promise.all([
+    void queryClient.prefetchQuery(
+      trpc.courses.getOne.queryOptions({ id: courseId })
+    ),
+    void queryClient.prefetchQuery(trpc.categories.getMany.queryOptions()),
+    void queryClient.prefetchQuery(
+      trpc.attachments.getMany.queryOptions({ courseId })
+    ),
+    void queryClient.prefetchQuery(
+      trpc.chapters.getMany.queryOptions({ courseId })
+    ),
+  ]);
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Suspense fallback={<p>Loading</p>}>

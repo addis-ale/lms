@@ -50,14 +50,15 @@ export const ChaptersForm = ({ initialData, courseId }: Props) => {
     createChapter.mutate({ ...data, courseId: courseId });
   };
   const createChapter = useMutation(
-    trpc.courses.createCourseChapter.mutationOptions({
+    trpc.chapters.create.mutationOptions({
       onSuccess: async () => {
         //TODO: invalidate queries get many courses
         if (courseId)
           await queryClient.invalidateQueries(
-            trpc.courses.getCourseChapters.queryOptions({ courseId: courseId })
+            trpc.chapters.getMany.queryOptions({ courseId: courseId })
           );
         toggleCreating();
+        form.reset();
         toast.success("Course chapter created!");
       },
       onError: (error) => {
@@ -66,12 +67,12 @@ export const ChaptersForm = ({ initialData, courseId }: Props) => {
     })
   );
   const chaptersReorder = useMutation(
-    trpc.courses.reorderCourseChapters.mutationOptions({
+    trpc.chapters.reorder.mutationOptions({
       onSuccess: async () => {
         //TODO: invalidate queries get many courses
         if (courseId)
           await queryClient.invalidateQueries(
-            trpc.courses.getCourseChapters.queryOptions({ courseId: courseId })
+            trpc.chapters.getMany.queryOptions({ courseId: courseId })
           );
         setIsUpdating(false);
         toast.success("chapter reordered!");

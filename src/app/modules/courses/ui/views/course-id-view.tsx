@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import {
   CircleDollarSign,
@@ -26,16 +26,16 @@ export const CourseIdView = ({ courseId }: Props) => {
   const { data } = useSuspenseQuery(
     trpc.courses.getOne.queryOptions({ id: courseId })
   );
-  const { data: categories } = useQuery(
-    trpc.courses.getManyCategory.queryOptions()
+  const { data: categories } = useSuspenseQuery(
+    trpc.categories.getMany.queryOptions()
   );
-  const { data: courseAttachments } = useQuery(
-    trpc.courses.getCourseAttachments.queryOptions({
+  const { data: courseAttachments } = useSuspenseQuery(
+    trpc.attachments.getMany.queryOptions({
       courseId: courseId,
     })
   );
-  const { data: courseChapters } = useQuery(
-    trpc.courses.getCourseChapters.queryOptions({
+  const { data: courseChapters } = useSuspenseQuery(
+    trpc.chapters.getMany.queryOptions({
       courseId: courseId,
     })
   );
