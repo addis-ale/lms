@@ -7,7 +7,7 @@ import {
 } from "@/trpc/init";
 import { titleInsertSchema } from "../schema";
 import { z } from "zod";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 export const coursesRoute = createTRPCRouter({
   update: protectedProcedure
@@ -112,7 +112,8 @@ export const coursesRoute = createTRPCRouter({
         .where(eq(chapters.courseId, input.courseId))
         .orderBy(desc(chapters.position))
         .limit(1);
-      const newPosition = lastChapter ? lastChapter?.position ?? 0 + 1 : 1;
+      const newPosition = lastChapter ? (lastChapter?.position ?? 0) + 1 : 0;
+
       const [createdChapter] = await db
         .insert(chapters)
         .values({
@@ -123,6 +124,62 @@ export const coursesRoute = createTRPCRouter({
         .returning();
       return createdChapter;
     }),
+  reorderCourseChapters: protectedProcedure
+    .input(
+      z.object({
+        orders: z.array(
+          z.object({
+            id: z.string(),
+            position: z.number(),
+          })
+        ),
+        courseId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const [course] = await db
+        .select({ userId: courses.userId })
+        .from(courses)
+        .where(
+          and(
+            eq(courses.id, input.courseId),
+            eq(courses.userId, ctx.auth.user.id)
+          )
+        );
+
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+
+      // Optional validation: ensure chapters belong to this course
+      const chapterIds = input.orders.map((c) => c.id);
+      const validChapters = await db
+        .select({ id: chapters.id })
+        .from(chapters)
+        .where(
+          and(
+            inArray(chapters.id, chapterIds),
+            eq(chapters.courseId, input.courseId)
+          )
+        );
+
+      if (validChapters.length !== chapterIds.length) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid chapter IDs",
+        });
+      }
+
+      // Update positions in parallel
+      await Promise.all(
+        input.orders.map(({ id, position }) =>
+          db.update(chapters).set({ position }).where(eq(chapters.id, id))
+        )
+      );
+
+      return { success: true };
+    }),
+
   getCourseChapters: baseProcedure
     .input(
       z.object({
@@ -134,7 +191,7 @@ export const coursesRoute = createTRPCRouter({
         .select()
         .from(chapters)
         .where(eq(chapters.courseId, input.courseId))
-        .orderBy(desc(chapters.position));
+        .orderBy(asc(chapters.position));
       return courseChapters;
     }),
   getCourseAttachments: baseProcedure

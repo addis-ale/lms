@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useState } from "react";
-import { PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -20,9 +20,14 @@ import { chaptersInsertSchema } from "../../schema";
 import { useTRPC } from "@/trpc/client";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { ChaptersList } from "./chapters-list";
+import { useRouter } from "next/navigation";
 interface Props {
-  initialData?: {
+  initialData: {
     title: string;
+    id: string;
+    isPublished: boolean;
+    isFree: boolean;
   }[];
   courseId: string;
 }
@@ -43,12 +48,7 @@ export const ChaptersForm = ({ initialData, courseId }: Props) => {
   });
   const onSubmit = (data: z.infer<typeof chaptersInsertSchema>) => {
     createChapter.mutate({ ...data, courseId: courseId });
-
-    // createCourse.mutate(data);
   };
-
-  //const queryClient = useQueryClient();
-
   const createChapter = useMutation(
     trpc.courses.createCourseChapter.mutationOptions({
       onSuccess: async () => {
@@ -65,9 +65,41 @@ export const ChaptersForm = ({ initialData, courseId }: Props) => {
       },
     })
   );
-
+  const chaptersReorder = useMutation(
+    trpc.courses.reorderCourseChapters.mutationOptions({
+      onSuccess: async () => {
+        //TODO: invalidate queries get many courses
+        if (courseId)
+          await queryClient.invalidateQueries(
+            trpc.courses.getCourseChapters.queryOptions({ courseId: courseId })
+          );
+        setIsUpdating(false);
+        toast.success("chapter reordered!");
+      },
+      onError: (error) => {
+        setIsUpdating(false);
+        toast.error(error.message);
+      },
+    })
+  );
+  const onReorder = (updateData: { id: string; position: number }[]) => {
+    setIsUpdating(true);
+    chaptersReorder.mutate({
+      orders: updateData,
+      courseId: courseId,
+    });
+  };
+  const router = useRouter();
+  const onEdit = (id: string) => {
+    router.push(`/teacher/courses/${courseId}/chapters/${id}`);
+  };
   return (
-    <div className="bg-blue-400/10 p-3 ">
+    <div className="relative bg-blue-400/10 p-3 ">
+      {isUpdating && (
+        <div className="absolute h-full w-full bg-slate-500/20 runded-md top-0 right-0 flex items-center justify-center">
+          <Loader2 className="animate-spin size-6" />
+        </div>
+      )}
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
@@ -121,7 +153,13 @@ export const ChaptersForm = ({ initialData, courseId }: Props) => {
             )}
           >
             {!initialData?.length && "No chapters"}
-            {/* TODO: list of chapters */}
+            {
+              <ChaptersList
+                onEdit={onEdit}
+                onReorder={onReorder}
+                items={initialData || []}
+              />
+            }
           </div>
         )}{" "}
         {!isCreating && (
