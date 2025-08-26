@@ -44,8 +44,9 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
   const onSubmit = (data: z.infer<typeof titleInsertSchema>) => {
     if (isEdit) {
       updateCourse.mutate({ ...data, id: courseId });
+    } else {
+      createCourse.mutate(data);
     }
-    createCourse.mutate(data);
   };
 
   //const queryClient = useQueryClient();

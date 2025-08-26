@@ -27,15 +27,15 @@ export const CourseIdView = ({ courseId }: Props) => {
     trpc.courses.getOne.queryOptions({ id: courseId })
   );
   const { data: categories } = useSuspenseQuery(
-    trpc.courses.getManyCategory.queryOptions()
+    trpc.categories.getMany.queryOptions()
   );
   const { data: courseAttachments } = useSuspenseQuery(
-    trpc.courses.getCourseAttachments.queryOptions({
+    trpc.attachments.getMany.queryOptions({
       courseId: courseId,
     })
   );
   const { data: courseChapters } = useSuspenseQuery(
-    trpc.courses.getCourseChapters.queryOptions({
+    trpc.chapters.getMany.queryOptions({
       courseId: courseId,
     })
   );

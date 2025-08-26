@@ -34,12 +34,12 @@ export const AttachmentForm = ({ initialData, courseId }: Props) => {
   //const queryClient = useQueryClient();
 
   const updateCourse = useMutation(
-    trpc.courses.createAttachments.mutationOptions({
+    trpc.attachments.create.mutationOptions({
       onSuccess: async () => {
         //TODO: invalidate queries get many courses
         if (courseId)
           await queryClient.invalidateQueries(
-            trpc.courses.getCourseAttachments.queryOptions({
+            trpc.attachments.getMany.queryOptions({
               courseId: courseId,
             })
           );
@@ -53,11 +53,11 @@ export const AttachmentForm = ({ initialData, courseId }: Props) => {
     })
   );
   const removeAttachment = useMutation(
-    trpc.courses.removeAttachment.mutationOptions({
+    trpc.attachments.remove.mutationOptions({
       onSuccess: async () => {
         if (courseId)
           await queryClient.invalidateQueries(
-            trpc.courses.getCourseAttachments.queryOptions({
+            trpc.attachments.getMany.queryOptions({
               courseId: courseId,
             })
           );
