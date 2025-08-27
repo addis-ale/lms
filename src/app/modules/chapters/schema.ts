@@ -8,3 +8,6 @@ export const chapterDescriptionInsertSchema = z.object({
 export const chapterAccessInsertSchema = z.object({
   isFree: z.boolean(),
 });
+export const chapterVideoInsertSchema = z.object({
+  videoUrl: z.string().min(1),
+});

@@ -1,14 +1,19 @@
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { z } from "zod";
 import { db } from "@/db";
-import { chapters, courses } from "@/db/schema";
+import { chapters, courses, muxData } from "@/db/schema";
 import {
   baseProcedure,
   createTRPCRouter,
   protectedProcedure,
 } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
-import { z } from "zod";
+import { Mux } from "@mux/mux-node";
 
+const mux = new Mux({
+  tokenId: process.env.MUX_TOKEN_ID!,
+  tokenSecret: process.env.MUX_TOKEN_SECRET!,
+});
 export const chaptersRoute = createTRPCRouter({
   create: protectedProcedure
     .input(
@@ -125,6 +130,7 @@ export const chaptersRoute = createTRPCRouter({
           title,
           description,
           isFree,
+          videoUrl,
         })
         .where(and(eq(chapters.id, id), eq(chapters.courseId, courseId)))
         .returning();
@@ -134,7 +140,47 @@ export const chaptersRoute = createTRPCRouter({
           message: "Chapter not found",
         });
       }
+      if (videoUrl) {
+        const [existingMuxData] = await db
+          .select()
+          .from(muxData)
+          .where(eq(muxData.chapterId, id));
+        if (existingMuxData) {
+          await mux.video.assets.delete(existingMuxData.assetId);
+          await db.delete(muxData).where(eq(muxData.id, existingMuxData.id));
+        }
+        const asset = await mux.video.assets.create({
+          inputs: [{ url: videoUrl }],
+          playback_policy: ["public"],
+          video_quality: "basic",
+          test: false,
+        });
+        await db.insert(muxData).values({
+          assetId: asset.id,
+          chapterId: id,
+          playbackId: asset.playback_ids?.[0]?.id,
+        });
+      }
       return updatedChapter;
+    }),
+  getMux: baseProcedure
+    .input(
+      z.object({
+        chapterId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const [existingMuxData] = await db
+        .select()
+        .from(muxData)
+        .where(eq(muxData.chapterId, input.chapterId));
+      if (!existingMuxData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Mux data not found",
+        });
+      }
+      return existingMuxData;
     }),
   reorder: protectedProcedure
     .input(

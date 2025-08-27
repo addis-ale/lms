@@ -15,12 +15,20 @@ interface Props {
 const ChapterIdPage = async ({ params }: Props) => {
   const queryClient = getQueryClient();
   const { courseId, chapterId } = await params;
-  void queryClient.prefetchQuery(
-    trpc.chapters.getOne.queryOptions({
-      id: chapterId,
-      courseId: courseId,
-    })
-  );
+  await Promise.all([
+    void queryClient.prefetchQuery(
+      trpc.chapters.getOne.queryOptions({
+        id: chapterId,
+        courseId: courseId,
+      })
+    ),
+    void queryClient.prefetchQuery(
+      trpc.chapters.getMux.queryOptions({
+        chapterId,
+      })
+    ),
+  ]);
+
   return (
     <>
       <ChapterListHeader courseId={courseId} />

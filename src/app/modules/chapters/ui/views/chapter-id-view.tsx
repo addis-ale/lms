@@ -3,10 +3,11 @@
 import { IconBadge } from "@/components/icon-badge";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Eye, LayoutDashboardIcon } from "lucide-react";
+import { Eye, LayoutDashboardIcon, VideoIcon } from "lucide-react";
 import { ChapterTitle } from "../components/title-form";
 import { ChapterDescriptionForm } from "../components/chapter-description-form";
 import { ChapterAccessForm } from "../components/chapter-access-form";
+import { ChapterVideoForm } from "../components/chapter-video-form";
 
 interface Props {
   courseId: string;
@@ -18,6 +19,11 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
     trpc.chapters.getOne.queryOptions({
       id: chapterId,
       courseId: courseId,
+    })
+  );
+  const { data: muxData } = useSuspenseQuery(
+    trpc.chapters.getMux.queryOptions({
+      chapterId,
     })
   );
   const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
@@ -32,6 +38,10 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
   };
   const initialChapterAccessData = {
     isFree: chapter.isFree ?? false,
+  };
+  const initialChapterVideoData = {
+    videoUrl: chapter.videoUrl ?? "",
+    playbackId: muxData.playbackId ?? "",
   };
   return (
     <div className="px-6">
@@ -70,7 +80,16 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
             </div>
           </div>
           {/* second column */}
-          <div className="flex flex-col gap-y-4"></div>
+          <div className="flex flex-col gap-y-4">
+            <IconBadge icon={VideoIcon} title={"Add a video"} />
+            <div className="flex flex-col space-y-4">
+              <ChapterVideoForm
+                initialData={initialChapterVideoData}
+                chapterId={chapterId}
+                courseId={courseId}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

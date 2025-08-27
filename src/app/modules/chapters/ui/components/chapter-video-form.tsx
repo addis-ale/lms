@@ -2,41 +2,53 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useState } from "react";
-import { ImageIcon, PenIcon, PlusCircle } from "lucide-react";
+import { PenIcon, PlusCircle, VideoIcon } from "lucide-react";
 import { z } from "zod";
+import MuxPlayer from "@mux/mux-player-react";
 import { Button } from "@/components/ui/button";
-import { imageUrlInsertSchema } from "../../schema";
 import { useTRPC } from "@/trpc/client";
-import Image from "next/image";
-import { FileUpload } from "../../../../../components/file-upload";
+import { FileUpload } from "@/components/file-upload";
+import { chapterVideoInsertSchema } from "../../schema";
+
 interface Props {
-  initialData?: {
-    imageUrl: string;
+  initialData: {
+    videoUrl: string;
+    playbackId: string;
   };
   courseId: string;
+  chapterId: string;
 }
 
-export const ImageForm = ({ initialData, courseId }: Props) => {
+export const ChapterVideoForm = ({
+  initialData,
+  courseId,
+  chapterId,
+}: Props) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [openEdit, setOpenEdit] = useState(false);
 
-  const onSubmit = (data: z.infer<typeof imageUrlInsertSchema>) => {
-    updateCourse.mutate({ ...data, id: courseId });
+  const onSubmit = (data: z.infer<typeof chapterVideoInsertSchema>) => {
+    updateChapter.mutate({ ...data, id: chapterId, courseId });
   };
 
   //const queryClient = useQueryClient();
 
-  const updateCourse = useMutation(
-    trpc.courses.update.mutationOptions({
+  const updateChapter = useMutation(
+    trpc.chapters.update.mutationOptions({
       onSuccess: async () => {
         //TODO: invalidate queries get many courses
         if (courseId)
-          await queryClient.invalidateQueries(
-            trpc.courses.getOne.queryOptions({ id: courseId })
-          );
+          await Promise.all([
+            queryClient.invalidateQueries(
+              trpc.chapters.getOne.queryOptions({ id: chapterId, courseId })
+            ),
+            queryClient.invalidateQueries(
+              trpc.chapters.getMany.queryOptions({ courseId })
+            ),
+          ]);
         setOpenEdit(false);
-        toast.success("Course cover image updated!");
+        toast.success("Chapter updated!");
       },
       onError: (error) => {
         toast.error(error.message);
@@ -49,32 +61,32 @@ export const ImageForm = ({ initialData, courseId }: Props) => {
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-md">Course Cover Image</h3>
+            <h3 className="font-semibold text-md">Chapter Video</h3>
             {openEdit && (
               <Button
                 variant={"outline"}
                 onClick={() => setOpenEdit(false)}
-                disabled={updateCourse.isPending}
+                disabled={updateChapter.isPending}
               >
                 Cancel
               </Button>
             )}
-            {!openEdit && !!initialData?.imageUrl && (
+            {!openEdit && !!initialData?.videoUrl && (
               <Button
                 className=""
                 variant={"outline"}
                 onClick={() => setOpenEdit(true)}
-                disabled={updateCourse.isPending}
+                disabled={updateChapter.isPending}
               >
                 <PenIcon className="size-5" /> Edit
               </Button>
             )}
-            {!openEdit && !!!initialData?.imageUrl && (
+            {!openEdit && !!!initialData?.videoUrl && (
               <Button
                 className=""
                 variant={"outline"}
                 onClick={() => setOpenEdit(true)}
-                disabled={updateCourse.isPending}
+                disabled={updateChapter.isPending}
               >
                 <PlusCircle className="size-5" /> Add an image
               </Button>
@@ -82,18 +94,13 @@ export const ImageForm = ({ initialData, courseId }: Props) => {
           </div>
           {!openEdit && (
             <div>
-              {!!initialData?.imageUrl ? (
+              {!!initialData?.videoUrl ? (
                 <div className="relative aspect-video mt-2">
-                  <Image
-                    src={initialData.imageUrl}
-                    alt="uploaded image"
-                    fill
-                    className="rounded-md object-cover"
-                  />
+                  <MuxPlayer playbackId={initialData.playbackId} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md">
-                  <ImageIcon className="h-10 w-10 text-slate-500" />
+                  <VideoIcon className="h-10 w-10 text-slate-500" />
                 </div>
               )}
             </div>
@@ -102,19 +109,25 @@ export const ImageForm = ({ initialData, courseId }: Props) => {
         {openEdit && (
           <div className="">
             <FileUpload
-              endpoint="courseImage"
+              endpoint="chapterVideo"
               onChange={(url) => {
                 if (url) {
-                  onSubmit({ imageUrl: url });
+                  onSubmit({ videoUrl: url });
                 }
               }}
             />
             <div className="text-xs text-muted-foreground mt-4 text-center">
-              16:9 aspect ratio is recommended
+              Upload this chapter&apos;s video
             </div>
           </div>
         )}
       </div>
+      {initialData.videoUrl && !openEdit && (
+        <div className="text-xs text-muted-foreground mt-2">
+          Video can take a few minutes to process. Refresh the page if video
+          does not appear.
+        </div>
+      )}
     </div>
   );
 };
