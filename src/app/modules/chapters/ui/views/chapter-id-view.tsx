@@ -3,9 +3,10 @@
 import { IconBadge } from "@/components/icon-badge";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { LayoutDashboardIcon } from "lucide-react";
+import { Eye, LayoutDashboardIcon } from "lucide-react";
 import { ChapterTitle } from "../components/title-form";
 import { ChapterDescriptionForm } from "../components/chapter-description-form";
+import { ChapterAccessForm } from "../components/chapter-access-form";
 
 interface Props {
   courseId: string;
@@ -28,6 +29,9 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
   };
   const initialChapterDescData = {
     description: chapter.description ?? "",
+  };
+  const initialChapterAccessData = {
+    isFree: chapter.isFree ?? false,
   };
   return (
     <div className="px-6">
@@ -52,6 +56,14 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
               />
               <ChapterDescriptionForm
                 initialData={initialChapterDescData}
+                chapterId={chapterId}
+                courseId={courseId}
+              />
+            </div>
+            <IconBadge icon={Eye} title={"Access Settings"} />
+            <div>
+              <ChapterAccessForm
+                initialData={initialChapterAccessData}
                 chapterId={chapterId}
                 courseId={courseId}
               />
