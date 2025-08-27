@@ -133,3 +133,6 @@
     cursor: pointer;
   }
 }
+.ql-editor {
+  font-size: 16px !important;
+}
