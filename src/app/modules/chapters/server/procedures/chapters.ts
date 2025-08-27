@@ -123,6 +123,7 @@ export const chaptersRoute = createTRPCRouter({
         .update(chapters)
         .set({
           title,
+          description,
         })
         .where(and(eq(chapters.id, id), eq(chapters.courseId, courseId)))
         .returning();
