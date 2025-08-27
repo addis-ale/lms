@@ -5,6 +5,7 @@ import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { LayoutDashboardIcon } from "lucide-react";
 import { ChapterTitle } from "../components/title-form";
+import { ChapterDescriptionForm } from "../components/chapter-description-form";
 
 interface Props {
   courseId: string;
@@ -25,6 +26,9 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
   const initialChapterTitleData = {
     title: chapter.title,
   };
+  const initialChapterDescData = {
+    description: chapter.description ?? "",
+  };
   return (
     <div className="px-6">
       <div className="flex flex-col space-y-8">
@@ -43,6 +47,11 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
             <div className="flex flex-col space-y-4">
               <ChapterTitle
                 initialData={initialChapterTitleData}
+                chapterId={chapterId}
+                courseId={courseId}
+              />
+              <ChapterDescriptionForm
+                initialData={initialChapterDescData}
                 chapterId={chapterId}
                 courseId={courseId}
               />
