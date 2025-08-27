@@ -60,7 +60,7 @@ export const coursesRoute = createTRPCRouter({
           and(eq(courses.id, input.id), eq(courses.userId, ctx.auth.user.id))
         );
       if (!existedCourse) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found" });
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
       }
       return existedCourse;
     }),

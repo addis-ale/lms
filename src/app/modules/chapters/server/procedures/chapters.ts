@@ -66,6 +66,74 @@ export const chaptersRoute = createTRPCRouter({
         .orderBy(asc(chapters.position));
       return courseChapters;
     }),
+  getOne: baseProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        courseId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const [courseChapter] = await db
+        .select()
+        .from(chapters)
+        .where(
+          and(eq(chapters.id, input.id), eq(chapters.courseId, input.courseId))
+        );
+      if (!courseChapter) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Chapter not found",
+        });
+      }
+      return courseChapter;
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        courseId: z.string(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        videoUrl: z.string().optional(),
+        isPublished: z.boolean().optional(),
+        isFree: z.boolean().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const {
+        id,
+        courseId,
+        title,
+        description,
+        videoUrl,
+        isPublished,
+        isFree,
+      } = input;
+      const [course] = await db
+        .select({ userId: courses.userId })
+        .from(courses)
+        .where(
+          and(eq(courses.id, courseId), eq(courses.userId, ctx.auth.user.id))
+        );
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+      const [updatedChapter] = await db
+        .update(chapters)
+        .set({
+          title,
+        })
+        .where(and(eq(chapters.id, id), eq(chapters.courseId, courseId)))
+        .returning();
+      if (!updatedChapter) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Chapter not found",
+        });
+      }
+      return updatedChapter;
+    }),
   reorder: protectedProcedure
     .input(
       z.object({

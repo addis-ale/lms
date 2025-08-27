@@ -16,12 +16,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { chaptersInsertSchema } from "../../schema";
+
 import { useTRPC } from "@/trpc/client";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ChaptersList } from "./chapters-list";
 import { useRouter } from "next/navigation";
+import { chapterTitleInsertSchema } from "@/app/modules/chapters/schema";
 interface Props {
   initialData: {
     title: string;
@@ -40,13 +41,13 @@ export const ChaptersForm = ({ initialData, courseId }: Props) => {
   const toggleCreating = () => {
     setIsCreating((prev) => !prev);
   };
-  const form = useForm<z.infer<typeof chaptersInsertSchema>>({
-    resolver: zodResolver(chaptersInsertSchema),
+  const form = useForm<z.infer<typeof chapterTitleInsertSchema>>({
+    resolver: zodResolver(chapterTitleInsertSchema),
     defaultValues: {
       title: "",
     },
   });
-  const onSubmit = (data: z.infer<typeof chaptersInsertSchema>) => {
+  const onSubmit = (data: z.infer<typeof chapterTitleInsertSchema>) => {
     createChapter.mutate({ ...data, courseId: courseId });
   };
   const createChapter = useMutation(
