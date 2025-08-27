@@ -14,7 +14,7 @@ import { ImageForm } from "../components/image-form";
 import { CategoryForm } from "../components/category-form";
 import { CategoryGetOne } from "../../types";
 import { PriceForm } from "../components/price-form";
-import { IconBadge } from "../components/icon-badge";
+import { IconBadge } from "../../../../../components/icon-badge";
 import { AttachmentForm } from "../components/attachment-form";
 import { ChaptersForm } from "../components/chapters-form";
 
