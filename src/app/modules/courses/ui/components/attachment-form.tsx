@@ -7,7 +7,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { attachmentsInsertSchema } from "../../schema";
 import { useTRPC } from "@/trpc/client";
-import { FileUpload } from "./file-upload";
+import { FileUpload } from "../../../../../components/file-upload";
 interface Props {
   initialData: {
     url: string;
