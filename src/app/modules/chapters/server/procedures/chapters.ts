@@ -191,6 +191,54 @@ export const chaptersRoute = createTRPCRouter({
       if (!course) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
       }
+      if (typeof isPublished !== "undefined") {
+        if (isPublished) {
+          const [chapter] = await db
+            .select()
+            .from(chapters)
+            .where(and(eq(chapters.id, id), eq(chapters.courseId, courseId)));
+          if (!chapter.title || !chapter.description || !chapter.videoUrl) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Missing required fields before publishing",
+            });
+          }
+          // publish the chapter
+          const [publishedChapter] = await db
+            .update(chapters)
+            .set({
+              isPublished,
+            })
+            .where(and(eq(chapters.id, id), eq(chapters.courseId, courseId)))
+            .returning();
+          return publishedChapter;
+        } else {
+          const [unPublishedChapter] = await db
+            .update(chapters)
+            .set({
+              isPublished,
+            })
+            .where(and(eq(chapters.id, id), eq(chapters.courseId, courseId)))
+            .returning();
+
+          const courseChapters = await db
+            .select()
+            .from(chapters)
+            .where(and(eq(chapters.courseId, courseId)));
+          const courseHasPublishedChapter = courseChapters.some(
+            (chapter) => chapter.isPublished === true
+          );
+          if (!courseHasPublishedChapter) {
+            await db
+              .update(courses)
+              .set({
+                isPublished: false,
+              })
+              .where(and(eq(courses.id, courseId)));
+          }
+          return unPublishedChapter;
+        }
+      }
       const [updatedChapter] = await db
         .update(chapters)
         .set({
@@ -198,7 +246,6 @@ export const chaptersRoute = createTRPCRouter({
           description,
           isFree,
           videoUrl,
-          isPublished,
         })
         .where(and(eq(chapters.id, id), eq(chapters.courseId, courseId)))
         .returning();
