@@ -1,4 +1,5 @@
 import { CourseIdView } from "@/app/modules/courses/ui/views/course-id-view";
+import { BackLink } from "@/components/back-link";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
@@ -24,13 +25,16 @@ const Page = async ({ params }: Props) => {
   ]);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={<p>Loading</p>}>
-        <ErrorBoundary fallback={<p>error</p>}>
-          <CourseIdView courseId={courseId} />
-        </ErrorBoundary>
-      </Suspense>
-    </HydrationBoundary>
+    <>
+      <BackLink href="/teacher/courses" label="Back to my courses" />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <Suspense fallback={<p>Loading</p>}>
+          <ErrorBoundary fallback={<p>error</p>}>
+            <CourseIdView courseId={courseId} />
+          </ErrorBoundary>
+        </Suspense>
+      </HydrationBoundary>
+    </>
   );
 };
 

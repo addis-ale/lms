@@ -13,7 +13,7 @@ interface Props {
 export const DashBoardCommand = ({ open, setOpen }: Props) => {
   return (
     <CommandResponsiveDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Find a meeting or agent" />
+      <CommandInput placeholder="Find a course" />
       <CommandList>
         <CommandItem>Test</CommandItem>
       </CommandList>
