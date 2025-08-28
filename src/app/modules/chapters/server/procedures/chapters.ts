@@ -93,6 +93,73 @@ export const chaptersRoute = createTRPCRouter({
       }
       return courseChapter;
     }),
+  remove: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        courseId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const [course] = await db
+        .select({ userId: courses.userId })
+        .from(courses)
+        .where(
+          and(
+            eq(courses.id, input.courseId),
+            eq(courses.userId, ctx.auth.user.id)
+          )
+        );
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+      const [toDeleteChapter] = await db
+        .select()
+        .from(chapters)
+        .where(
+          and(eq(chapters.id, input.id), eq(chapters.courseId, input.courseId))
+        );
+
+      if (!toDeleteChapter) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "chapter not found to delete.",
+        });
+      }
+      if (toDeleteChapter.videoUrl) {
+        const [existingMuxData] = await db
+          .select({ assetId: muxData.assetId })
+          .from(muxData)
+          .where(eq(muxData.chapterId, toDeleteChapter.id));
+        if (existingMuxData.assetId) {
+          await mux.video.assets.delete(existingMuxData.assetId);
+        }
+      }
+      const [deletedChapter] = await db
+        .delete(chapters)
+        .where(
+          and(eq(chapters.id, input.id), eq(chapters.courseId, input.courseId))
+        )
+        .returning();
+      const publishedChaptersIncourse = await db
+        .select()
+        .from(chapters)
+        .where(
+          and(
+            eq(chapters.courseId, input.courseId),
+            eq(chapters.isPublished, true)
+          )
+        );
+      if (!publishedChaptersIncourse.length) {
+        await db
+          .update(courses)
+          .set({
+            isPublished: false,
+          })
+          .where(eq(courses.id, input.courseId));
+      }
+      return deletedChapter;
+    }),
   update: protectedProcedure
     .input(
       z.object({
@@ -131,6 +198,7 @@ export const chaptersRoute = createTRPCRouter({
           description,
           isFree,
           videoUrl,
+          isPublished,
         })
         .where(and(eq(chapters.id, id), eq(chapters.courseId, courseId)))
         .returning();
@@ -175,10 +243,7 @@ export const chaptersRoute = createTRPCRouter({
         .from(muxData)
         .where(eq(muxData.chapterId, input.chapterId));
       if (!existingMuxData) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Mux data not found",
-        });
+        return null;
       }
       return existingMuxData;
     }),
