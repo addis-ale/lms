@@ -11,7 +11,6 @@ interface ChapterActionProps {
 }
 export const ChapterActions = ({
   disabled,
-
   isPublished,
   onRemove,
   onPublish,
