@@ -1,11 +1,30 @@
-import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import {
+  baseProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from "@/trpc/init";
 import { titleInsertSchema } from "../../schema";
 import { db } from "@/db";
 import { chapters, courses, muxData } from "@/db/schema";
 import { z } from "zod";
-import { and, eq, inArray, isNotNull, ne } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNotNull,
+  ne,
+} from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { Mux } from "@mux/mux-node";
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE,
+} from "@/constants";
 
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID!,
@@ -158,22 +177,58 @@ export const coursesRoute = createTRPCRouter({
 
       return deleteCourse;
     }),
-  getOne: protectedProcedure
+  getOne: baseProcedure
     .input(
       z.object({
         id: z.string(),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const [existedCourse] = await db
         .select()
         .from(courses)
-        .where(
-          and(eq(courses.id, input.id), eq(courses.userId, ctx.auth.user.id))
-        );
+        .where(eq(courses.id, input.id));
       if (!existedCourse) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
       }
       return existedCourse;
+    }),
+  getMyCourse: protectedProcedure
+    .input(
+      z.object({
+        page: z.number().default(DEFAULT_PAGE),
+        pageSize: z
+          .number()
+          .min(MIN_PAGE_SIZE)
+          .max(MAX_PAGE_SIZE)
+          .default(DEFAULT_PAGE_SIZE),
+        search: z.string().nullish(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const { search, page, pageSize } = input;
+      const data = await db
+        .select()
+        .from(courses)
+        .where(
+          and(
+            eq(courses.userId, ctx.auth.user.id),
+            search ? ilike(courses.title, `%${search}%`) : undefined
+          )
+        )
+        .orderBy(desc(courses.createdAt), desc(courses.id))
+        .limit(pageSize)
+        .offset((page - 1) * pageSize);
+      const [total] = await db
+        .select({ count: count() })
+        .from(courses)
+        .where(
+          and(
+            eq(courses.userId, ctx.auth.user.id),
+            search ? ilike(courses.title, `%${search}%`) : undefined
+          )
+        );
+      const totalPage = Math.ceil(total.count / pageSize);
+      return { items: data, total: total.count, totalPages: totalPage };
     }),
 });

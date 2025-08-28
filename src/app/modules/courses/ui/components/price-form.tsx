@@ -50,9 +50,14 @@ export const PriceForm = ({ initialData, courseId }: Props) => {
       onSuccess: async () => {
         //TODO: invalidate queries get many courses
         if (courseId)
-          await queryClient.invalidateQueries(
-            trpc.courses.getOne.queryOptions({ id: courseId })
-          );
+          await Promise.all([
+            queryClient.invalidateQueries(
+              trpc.courses.getMyCourse.queryOptions({})
+            ),
+            queryClient.invalidateQueries(
+              trpc.courses.getOne.queryOptions({ id: courseId })
+            ),
+          ]);
         setOpenEdit(false);
         toast.success("Course price updated!");
       },
