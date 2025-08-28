@@ -32,9 +32,14 @@ export const ImageForm = ({ initialData, courseId }: Props) => {
       onSuccess: async () => {
         //TODO: invalidate queries get many courses
         if (courseId)
-          await queryClient.invalidateQueries(
-            trpc.courses.getOne.queryOptions({ id: courseId })
-          );
+          await Promise.all([
+            queryClient.invalidateQueries(
+              trpc.courses.getOne.queryOptions({ id: courseId })
+            ),
+            queryClient.invalidateQueries(
+              trpc.courses.getMyCourse.queryOptions({})
+            ),
+          ]);
         setOpenEdit(false);
         toast.success("Course cover image updated!");
       },

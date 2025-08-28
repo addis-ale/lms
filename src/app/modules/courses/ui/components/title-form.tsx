@@ -54,7 +54,9 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
     trpc.courses.create.mutationOptions({
       onSuccess: async (data) => {
         //TODO: invalidate query get many course
-        // await queryClient.invalidateQueries(trpc.courses.getMany.queryOptions({}))
+        await queryClient.invalidateQueries(
+          trpc.courses.getMyCourse.queryOptions({})
+        );
         toast.success("Course Created!");
         router.push(`/teacher/courses/${data.id}`);
       },
@@ -68,9 +70,14 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
       onSuccess: async () => {
         //TODO: invalidate queries get many courses
         if (courseId)
-          await queryClient.invalidateQueries(
-            trpc.courses.getOne.queryOptions({ id: courseId })
-          );
+          await Promise.all([
+            queryClient.invalidateQueries(
+              trpc.courses.getMyCourse.queryOptions({})
+            ),
+            queryClient.invalidateQueries(
+              trpc.courses.getOne.queryOptions({ id: courseId })
+            ),
+          ]);
         setOpenEdit(false);
         toast.success("Course title updated!");
       },
@@ -173,11 +180,19 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
           />
           <div className="flex justify-end gap-x-4">
             <Link href={"/teacher/courses"}>
-              <Button type="button" variant={"ghost"}>
+              <Button
+                type="button"
+                variant={"ghost"}
+                disabled={updateCourse.isPending || createCourse.isPending}
+              >
                 Cancel
               </Button>
             </Link>
-            <Button className="" type="submit">
+            <Button
+              className=""
+              type="submit"
+              disabled={updateCourse.isPending || createCourse.isPending}
+            >
               Continue
             </Button>
           </div>
