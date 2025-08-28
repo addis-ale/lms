@@ -15,7 +15,6 @@ export const categoriesRoute = createTRPCRouter({
       .select()
       .from(category)
       .orderBy(asc(category.name));
-
     return categories;
   }),
   getOne: protectedProcedure
