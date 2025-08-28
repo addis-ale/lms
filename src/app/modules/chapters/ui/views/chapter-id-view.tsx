@@ -126,6 +126,7 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
         />
       )}
       <div className="px-6 pb-6 relative">
+        {/* make full screen blocking component and reuse it */}
         {(removeChapter.isPending || publishChapter.isPending) && (
           <div className="absolute h-full w-full bg-slate-500/20 runded-md top-0 right-0 flex items-center justify-center">
             <Loader2 className="animate-spin size-6" />
