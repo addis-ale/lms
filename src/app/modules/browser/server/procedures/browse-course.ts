@@ -7,7 +7,8 @@ import {
   purchase,
 } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { and, count, desc, eq, ilike, inArray } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 import { z } from "zod";
 const getProgress = async (userId: string, courseId: string) => {
   const publishedChapters = await db
@@ -126,5 +127,38 @@ export const browseCourseRoute = createTRPCRouter({
         })
       );
       return courseWithProgress;
+    }),
+  getOne: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const [course] = await db
+        .select()
+        .from(courses)
+        .where(and(eq(courses.id, input.id)));
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+      const chaptersWithUserProgress = await db
+        .select()
+        .from(chapters)
+        .where(
+          and(eq(chapters.courseId, course.id), eq(chapters.isPublished, true))
+        )
+        .leftJoin(
+          userProgress,
+          and(
+            eq(userProgress.chapterId, chapters.id),
+            eq(userProgress.userId, ctx.auth.user.id)
+          )
+        )
+        .orderBy(asc(chapters.position));
+      return {
+        ...course,
+        chapters: chaptersWithUserProgress,
+      };
     }),
 });

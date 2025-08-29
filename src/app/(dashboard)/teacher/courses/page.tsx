@@ -9,6 +9,7 @@ interface Props {
   searchParams: Promise<SearchParams>;
 }
 const CoursePage = async ({ searchParams }: Props) => {
+  // TODO: protect the page
   const filters = await loadSearchParams(searchParams);
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(
