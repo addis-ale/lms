@@ -31,6 +31,7 @@ interface Props {
 
 export const TitleForm = ({ initialData, courseId }: Props) => {
   const isEdit = !!courseId && !!initialData;
+  const [isLoading, setIsLoading] = useState(false);
   const trpc = useTRPC();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -43,9 +44,11 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
   });
   const onSubmit = (data: z.infer<typeof titleInsertSchema>) => {
     if (isEdit) {
+      setIsLoading(true);
       updateCourse.mutate({ ...data, id: courseId });
     } else {
       createCourse.mutate(data);
+      setIsLoading(true);
     }
   };
 
@@ -57,11 +60,13 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
         await queryClient.invalidateQueries(
           trpc.courses.getMyCourse.queryOptions({})
         );
-        toast.success("Course Created!");
         router.push(`/teacher/courses/${data.id}`);
+        toast.success("Course Created!");
+        setIsLoading(false);
       },
       onError: (error) => {
         toast.error(error.message);
+        setIsLoading(false);
       },
     })
   );
@@ -142,7 +147,10 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
                     </FormItem>
                   )}
                 />
-                <Button disabled={updateCourse.isPending} type="submit">
+                <Button
+                  disabled={updateCourse.isPending || isLoading}
+                  type="submit"
+                >
                   Save
                 </Button>
               </form>
@@ -183,7 +191,9 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
               <Button
                 type="button"
                 variant={"ghost"}
-                disabled={updateCourse.isPending || createCourse.isPending}
+                disabled={
+                  updateCourse.isPending || createCourse.isPending || isLoading
+                }
               >
                 Cancel
               </Button>
@@ -191,7 +201,9 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
             <Button
               className=""
               type="submit"
-              disabled={updateCourse.isPending || createCourse.isPending}
+              disabled={
+                isLoading || updateCourse.isPending || createCourse.isPending
+              }
             >
               Continue
             </Button>
