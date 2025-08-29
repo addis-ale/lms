@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { Categories } from "../components/categories";
 import { useFilter } from "@/hooks/use-filter";
+import CoursesList from "@/components/courses-list";
 
 export const BrowserView = () => {
   const [filter] = useFilter();
@@ -16,10 +17,11 @@ export const BrowserView = () => {
       categoryId: filter.category,
     })
   );
-  console.log(myCourses);
+
   return (
-    <div className="mt-8 p-6 w-full">
+    <div className="mt-8 p-6 w-full space-y-4 md:space-y-6">
       <Categories categories={categories} />
+      <CoursesList items={myCourses} />
     </div>
   );
 };

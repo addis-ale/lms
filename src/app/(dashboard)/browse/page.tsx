@@ -11,7 +11,7 @@ interface Props {
 }
 const BrowsePage = async ({ filterParams }: Props) => {
   const filter = await loadSearchParams(filterParams);
-  // TODO filter with category
+  // TODO protected page
   const queryClient = getQueryClient();
   await Promise.all([
     void queryClient.prefetchQuery(trpc.categories.getMany.queryOptions()),
