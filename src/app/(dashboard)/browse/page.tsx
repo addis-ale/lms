@@ -4,12 +4,13 @@ import { ErrorBoundary } from "react-error-boundary";
 import { BrowserView } from "@/app/modules/browser/ui/views/browser-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { SearchParams } from "nuqs";
-import { loadSearchParams } from "@/app/modules/browser/params";
+import { loadSearchParams } from "@/lib/params";
+
 interface Props {
-  categoryParams: Promise<SearchParams>;
+  filterParams: Promise<SearchParams>;
 }
-const BrowsePage = async ({ categoryParams }: Props) => {
-  const category = await loadSearchParams(categoryParams);
+const BrowsePage = async ({ filterParams }: Props) => {
+  const filter = await loadSearchParams(filterParams);
   // TODO filter with category
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(trpc.categories.getMany.queryOptions());
