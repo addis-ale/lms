@@ -2,14 +2,14 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { IconType } from "react-icons";
-import { useCategoryFilter } from "../../hooks/use-category-filter";
+import { useFilter } from "@/hooks/use-filter";
 interface Props {
   label: string;
   icon?: IconType;
   value?: string;
 }
 export const CategoryItem = ({ label, icon: Icon, value }: Props) => {
-  const [filter, setFilter] = useCategoryFilter();
+  const [filter, setFilter] = useFilter();
   const isActive = value === filter.category;
   return (
     <Button
