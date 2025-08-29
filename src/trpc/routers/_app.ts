@@ -3,7 +3,7 @@ import { createTRPCRouter } from "../init";
 import { chaptersRoute } from "@/app/modules/chapters/server/procedures/chapters";
 import { attachmentsRoute } from "@/app/modules/courses/server/procedures/attachments";
 import { categoriesRoute } from "@/app/modules/courses/server/procedures/category";
-import { browseCourseRoute } from "@/app/modules/dashboard/server/procedures/enrolled";
+import { browseCourseRoute } from "@/app/modules/browser/server/procedures/browse-course";
 
 export const appRouter = createTRPCRouter({
   courses: coursesRoute,
