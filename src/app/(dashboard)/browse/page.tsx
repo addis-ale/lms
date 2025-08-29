@@ -13,7 +13,15 @@ const BrowsePage = async ({ filterParams }: Props) => {
   const filter = await loadSearchParams(filterParams);
   // TODO filter with category
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(trpc.categories.getMany.queryOptions());
+  await Promise.all([
+    void queryClient.prefetchQuery(trpc.categories.getMany.queryOptions()),
+    void queryClient.prefetchQuery(
+      trpc.browseCourse.getMany.queryOptions({
+        search: filter.search,
+        categoryId: filter.category,
+      })
+    ),
+  ]);
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Suspense fallback={<p>loading</p>}>
