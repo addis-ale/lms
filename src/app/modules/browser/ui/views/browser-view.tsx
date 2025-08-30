@@ -17,7 +17,6 @@ export const BrowserView = () => {
       categoryId: filter.category,
     })
   );
-
   return (
     <div className="mt-8 p-6 w-full space-y-4 md:space-y-6">
       <Categories categories={categories} />

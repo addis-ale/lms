@@ -1,11 +1,7 @@
-import {
-  baseProcedure,
-  createTRPCRouter,
-  protectedProcedure,
-} from "@/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { titleInsertSchema } from "../../schema";
 import { db } from "@/db";
-import { chapters, courses, muxData } from "@/db/schema";
+import { chapters, courses, muxData, purchase } from "@/db/schema";
 import { z } from "zod";
 import {
   and,
@@ -177,22 +173,35 @@ export const coursesRoute = createTRPCRouter({
 
       return deleteCourse;
     }),
-  getOne: baseProcedure
-    .input(
-      z.object({
-        id: z.string(),
-      })
-    )
-    .query(async ({ input }) => {
+  getOne: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
       const [existedCourse] = await db
         .select()
         .from(courses)
         .where(eq(courses.id, input.id));
+
       if (!existedCourse) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
       }
-      return existedCourse;
+
+      // 2️⃣ Check if purchased
+      const [purchased] = await db
+        .select()
+        .from(purchase)
+        .where(
+          and(
+            eq(purchase.courseId, input.id),
+            eq(purchase.userId, ctx.auth.user.id)
+          )
+        );
+      const isPurchased = !!purchased;
+      return {
+        ...existedCourse,
+        isPurchased,
+      };
     }),
+
   getMyCourse: protectedProcedure
     .input(
       z.object({
@@ -230,24 +239,5 @@ export const coursesRoute = createTRPCRouter({
         );
       const totalPage = Math.ceil(total.count / pageSize);
       return { items: data, total: total.count, totalPages: totalPage };
-    }),
-  getMany: baseProcedure
-    .input(
-      z.object({
-        search: z.string().optional(),
-        category: z.string().optional(),
-      })
-    )
-    .query(async ({ input }) => {
-      const { search, category } = input;
-      const conditions = [
-        eq(courses.isPublished, true),
-        category ? eq(courses.categoryId, category) : undefined,
-        search ? ilike(courses.title, `%${search}%`) : undefined,
-      ].filter(Boolean);
-      const allCourses = await db
-        .select()
-        .from(courses)
-        .where(and(...conditions));
     }),
 });

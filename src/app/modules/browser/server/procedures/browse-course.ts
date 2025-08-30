@@ -7,7 +7,8 @@ import {
   purchase,
 } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { and, count, desc, eq, ilike, inArray } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 import { z } from "zod";
 const getProgress = async (userId: string, courseId: string) => {
   const publishedChapters = await db
@@ -78,7 +79,7 @@ export const browseCourseRoute = createTRPCRouter({
         search ? ilike(courses.title, `%${search}%`) : undefined,
       ].filter(Boolean);
       const myCourses = await db
-        .select({
+        .selectDistinctOn([courses.id], {
           id: courses.id,
           title: courses.title,
           categoryName: category.name,
@@ -101,7 +102,7 @@ export const browseCourseRoute = createTRPCRouter({
             eq(purchase.courseId, courses.id)
           )
         )
-        .orderBy(desc(courses.createdAt));
+        .orderBy(courses.id, desc(courses.createdAt));
       const courseWithProgress = await Promise.all(
         myCourses.map(async (course) => {
           const [{ chapterCount }] = await db
@@ -126,5 +127,59 @@ export const browseCourseRoute = createTRPCRouter({
         })
       );
       return courseWithProgress;
+    }),
+  getOne: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const [course] = await db
+        .select()
+        .from(courses)
+        .where(and(eq(courses.id, input.id)));
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+      const chaptersWithUserProgress = await db
+        .select()
+        .from(chapters)
+        .where(
+          and(eq(chapters.courseId, course.id), eq(chapters.isPublished, true))
+        )
+        .leftJoin(
+          userProgress,
+          and(
+            eq(userProgress.chapterId, chapters.id),
+            eq(userProgress.userId, ctx.auth.user.id)
+          )
+        )
+        .orderBy(asc(chapters.position));
+      const progress = await getProgress(ctx.auth.user.id, course.id);
+      return {
+        ...course,
+        chapters: chaptersWithUserProgress,
+        progressCount: progress,
+      };
+    }),
+  isPurchased: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      })
+    )
+    .output(z.boolean())
+    .query(async ({ ctx, input }) => {
+      const [purched] = await db
+        .select()
+        .from(purchase)
+        .where(
+          and(
+            eq(purchase.userId, ctx.auth.user.id),
+            eq(purchase.courseId, input.courseId)
+          )
+        );
+      return !!purched;
     }),
 });
