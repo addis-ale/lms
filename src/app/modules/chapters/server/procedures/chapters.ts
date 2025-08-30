@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
-import { chapters, courses, muxData } from "@/db/schema";
+import { chapters, courses, muxData, userProgress } from "@/db/schema";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -93,6 +93,56 @@ export const chaptersRoute = createTRPCRouter({
       }
       return courseChapter;
     }),
+  getProgress: protectedProcedure
+    .input(
+      z.object({
+        chapterId: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const [myProgress] = await db
+        .select()
+        .from(userProgress)
+        .where(
+          and(
+            eq(userProgress.chapterId, input.chapterId),
+            eq(userProgress.userId, ctx.auth.user.id)
+          )
+        );
+      if (!userProgress) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Progress not found",
+        });
+      }
+      return myProgress;
+    }),
+  getNext: baseProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+        currentChapterId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const chaptersList = await db
+        .select()
+        .from(chapters)
+        .where(eq(chapters.courseId, input.courseId))
+        .orderBy(asc(chapters.position))
+        .execute();
+      const currentIndex = chaptersList.findIndex(
+        (c) => c.id === input.currentChapterId
+      );
+      if (currentIndex === -1 || currentIndex + 1 >= chaptersList.length) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Next chapter not found",
+        });
+      }
+      return chaptersList[currentIndex + 1];
+    }),
+
   remove: protectedProcedure
     .input(
       z.object({

@@ -231,23 +231,4 @@ export const coursesRoute = createTRPCRouter({
       const totalPage = Math.ceil(total.count / pageSize);
       return { items: data, total: total.count, totalPages: totalPage };
     }),
-  getMany: baseProcedure
-    .input(
-      z.object({
-        search: z.string().optional(),
-        category: z.string().optional(),
-      })
-    )
-    .query(async ({ input }) => {
-      const { search, category } = input;
-      const conditions = [
-        eq(courses.isPublished, true),
-        category ? eq(courses.categoryId, category) : undefined,
-        search ? ilike(courses.title, `%${search}%`) : undefined,
-      ].filter(Boolean);
-      const allCourses = await db
-        .select()
-        .from(courses)
-        .where(and(...conditions));
-    }),
 });
