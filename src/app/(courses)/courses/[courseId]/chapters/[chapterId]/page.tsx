@@ -33,16 +33,17 @@ const ChapterDetailPage = async ({ params }: Props) => {
       })
     ),
   ]);
-  const isPurchased = await queryClient.fetchQuery(
-    trpc.browseCourse.isPurchased.queryOptions({ courseId })
+  const course = await queryClient.fetchQuery(
+    trpc.courses.getOne.queryOptions({ id: courseId })
   );
-  if (isPurchased) {
+
+  if (course.isPurchased) {
     void queryClient.prefetchQuery(
       trpc.attachments.getMany.queryOptions({ courseId })
     );
   }
   if (
-    isPurchased ||
+    course.isPurchased ||
     queryClient.getQueryData(
       trpc.chapters.getOne.queryOptions({ id: chapterId, courseId }).queryKey
     )?.isFree
@@ -63,11 +64,17 @@ const ChapterDetailPage = async ({ params }: Props) => {
         })
       ),
     ]);
+    const nextChapter = await queryClient.fetchQuery(
+      trpc.chapters.getNext.queryOptions({
+        courseId,
+        currentChapterId: chapterId,
+      })
+    );
   }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Suspense fallback={<p>loading</p>}>
-        <ErrorBoundary fallback={<p>loading</p>}>
+        <ErrorBoundary fallback={<p>error</p>}>
           <ChapterDetailView courseId={courseId} chapterId={chapterId} />
         </ErrorBoundary>
       </Suspense>
