@@ -2,6 +2,12 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getQueryClient, trpc } from "@/trpc/server";
+import { CourseSidebar } from "@/app/modules/browser/ui/components/course-detail-sidebar";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { CourseDetailNavbar } from "@/app/modules/browser/ui/components/course-detail-navbar";
 
 interface Props {
   children: React.ReactNode;
@@ -21,6 +27,22 @@ const CourseDetailLayout = async ({ children, params }: Props) => {
       id: courseId,
     })
   );
-  return <div>{children}</div>;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Suspense fallback={<p> pending</p>}>
+        <ErrorBoundary fallback={<p>Error</p>}>
+          <SidebarProvider>
+            <div className="">
+              <CourseSidebar courseId={courseId} />
+            </div>
+            <main className="w-full">
+              <CourseDetailNavbar />
+              {children}
+            </main>
+          </SidebarProvider>
+        </ErrorBoundary>
+      </Suspense>
+    </HydrationBoundary>
+  );
 };
 export default CourseDetailLayout;

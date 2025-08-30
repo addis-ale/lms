@@ -156,9 +156,30 @@ export const browseCourseRoute = createTRPCRouter({
           )
         )
         .orderBy(asc(chapters.position));
+      const progress = await getProgress(ctx.auth.user.id, course.id);
       return {
         ...course,
         chapters: chaptersWithUserProgress,
+        progressCount: progress,
       };
+    }),
+  isPurchased: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string(),
+      })
+    )
+    .output(z.boolean())
+    .query(async ({ ctx, input }) => {
+      const [purched] = await db
+        .select()
+        .from(purchase)
+        .where(
+          and(
+            eq(purchase.userId, ctx.auth.user.id),
+            eq(purchase.courseId, input.courseId)
+          )
+        );
+      return !!purched;
     }),
 });
