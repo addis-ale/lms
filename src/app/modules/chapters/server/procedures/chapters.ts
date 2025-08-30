@@ -109,13 +109,7 @@ export const chaptersRoute = createTRPCRouter({
             eq(userProgress.userId, ctx.auth.user.id)
           )
         );
-      if (!userProgress) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Progress not found",
-        });
-      }
-      return myProgress;
+      return myProgress ?? { percentage: 0, lastWatchedAt: null };
     }),
   getNext: baseProcedure
     .input(
@@ -135,10 +129,7 @@ export const chaptersRoute = createTRPCRouter({
         (c) => c.id === input.currentChapterId
       );
       if (currentIndex === -1 || currentIndex + 1 >= chaptersList.length) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Next chapter not found",
-        });
+        return null;
       }
       return chaptersList[currentIndex + 1];
     }),
