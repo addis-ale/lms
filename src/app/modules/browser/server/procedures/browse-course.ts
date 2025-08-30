@@ -79,7 +79,7 @@ export const browseCourseRoute = createTRPCRouter({
         search ? ilike(courses.title, `%${search}%`) : undefined,
       ].filter(Boolean);
       const myCourses = await db
-        .select({
+        .selectDistinctOn([courses.id], {
           id: courses.id,
           title: courses.title,
           categoryName: category.name,
@@ -102,7 +102,7 @@ export const browseCourseRoute = createTRPCRouter({
             eq(purchase.courseId, courses.id)
           )
         )
-        .orderBy(desc(courses.createdAt));
+        .orderBy(courses.id, desc(courses.createdAt));
       const courseWithProgress = await Promise.all(
         myCourses.map(async (course) => {
           const [{ chapterCount }] = await db

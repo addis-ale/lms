@@ -4,6 +4,7 @@ interface Props {
 
 const ChapterDetailPage = async ({ params }: Props) => {
   const { chapterId } = await params;
+
   return <div>{chapterId}</div>;
 };
 

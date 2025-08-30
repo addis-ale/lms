@@ -88,6 +88,9 @@ export const CourseIdView = ({ courseId }: Props) => {
           queryClient.invalidateQueries(
             trpc.courses.getOne.queryOptions({ id: courseId })
           ),
+          queryClient.invalidateQueries(
+            trpc.browseCourse.getMany.queryOptions({})
+          ),
           // TODO:invalidate get many course
         ]);
         if (updatedCourse.isPublished) {
