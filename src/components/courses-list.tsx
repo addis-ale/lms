@@ -1,3 +1,5 @@
+"use client";
+
 import { GetManyCourses } from "../app/modules/browser/types";
 import CourseCard from "./course-card";
 
@@ -9,7 +11,17 @@ const CoursesList = ({ items }: Props) => {
     <div className="">
       <div className="grid sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-4 gap-4">
         {items.map((item) => (
-          <CourseCard key={item.id} item={item} />
+          <div key={item.id}>
+            <CourseCard
+              imageUrl={item.imageUrl!}
+              price={item.price!}
+              category={item.categoryName}
+              id={item.id}
+              title={item.title}
+              chapterCount={item.chapterCount}
+              progress={item.progress}
+            />
+          </div>
         ))}
       </div>
       {items.length === 0 && (

@@ -46,7 +46,10 @@ export const DashboardUserButton = () => {
       },
     });
   };
-  if (isPending || !data?.user) {
+  if (isPending) {
+    return null;
+  }
+  if (!data?.user) {
     return (
       <Link
         href={"/sign-in"}
@@ -92,13 +95,17 @@ export const DashboardUserButton = () => {
           <DrawerFooter>
             {isTeacherPage || isPlayerPage ? (
               <Link href={"/"}>
-                <BookOpen className="size-4 text-black" />
-                Student Mode
+                <Button>
+                  <BookOpen className="size-4 text-black" />
+                  Student Mode
+                </Button>
               </Link>
             ) : (
               <Link href={"/teacher/courses"}>
-                <GraduationCap className="size-4 text-black" />
-                Teacher Mode
+                <Button>
+                  <GraduationCap className="size-4 text-black" />
+                  Teacher Mode
+                </Button>
               </Link>
             )}
             <Button variant={"outline"} onClick={onLogout}>

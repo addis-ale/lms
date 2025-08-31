@@ -4,6 +4,10 @@ import { Banner } from "@/components/banner";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { VideoPlayer } from "../components/video-player";
+import { CourseEnrollButton } from "../components/course-enroll-button";
+import { Separator } from "@/components/ui/separator";
+import { Preview } from "@/components/preview";
+import { File } from "lucide-react";
 
 export const ChapterDetailView = ({
   chapterId,
@@ -38,6 +42,9 @@ export const ChapterDetailView = ({
       chapterId,
     })
   );
+  const { data: attachments } = useSuspenseQuery(
+    trpc.attachments.getMany.queryOptions({ courseId })
+  );
   const isLocked = !chapter.isFree || course.isPurchased;
 
   const completeOnEnd = course.isPurchased && !userProgress?.isCompleted;
@@ -68,6 +75,41 @@ export const ChapterDetailView = ({
               isLocked={isLocked}
               completeOnEnd={completeOnEnd}
             />
+          </div>
+          <div className="">
+            <div className="p-4 flex flex-col md:flex-row items-center justify-between">
+              <h2 className="text-2xl font-semibold mb-2">{chapter.title}</h2>
+              {course.isPurchased ? (
+                <div>{/* TODO: add course progress button */}</div>
+              ) : (
+                <CourseEnrollButton
+                  courseId={courseId}
+                  price={+course.price!}
+                />
+              )}
+            </div>
+            <Separator />
+            <div>
+              <Preview value={chapter.description!} />
+            </div>
+            {course.isPurchased && attachments.length && (
+              <>
+                <Separator />
+                <div className="p-4">
+                  {attachments.map((attachment) => (
+                    <a
+                      href={attachment.url}
+                      key={attachment.id}
+                      target="_blank"
+                      className="flex items-center p-3 w-full bg-sky-200 border text-sky-700 rounded-md hover:underline"
+                    >
+                      <File />
+                      <p className="line-clamp-1 truncate">{attachment.name}</p>
+                    </a>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
