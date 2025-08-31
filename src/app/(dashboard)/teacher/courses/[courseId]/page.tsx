@@ -1,14 +1,23 @@
-import { CourseIdView } from "@/app/modules/courses/ui/views/course-id-view";
-import { BackLink } from "@/components/back-link";
-import { getQueryClient, trpc } from "@/trpc/server";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { CourseIdView } from "@/app/modules/courses/ui/views/course-id-view";
+import { BackLink } from "@/components/back-link";
+import { auth } from "@/lib/auth";
+import { getQueryClient, trpc } from "@/trpc/server";
 interface Props {
   params: Promise<{ courseId: string }>;
 }
 
 const Page = async ({ params }: Props) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) {
+    redirect("/sign-in");
+  }
   const { courseId } = await params;
   const queryClient = getQueryClient();
   await Promise.all([
