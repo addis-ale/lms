@@ -5,11 +5,20 @@ import { BrowserView } from "@/app/modules/browser/ui/views/browser-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { SearchParams } from "nuqs";
 import { loadSearchParams } from "@/lib/params";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 interface Props {
   filterParams: Promise<SearchParams>;
 }
 const BrowsePage = async ({ filterParams }: Props) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) {
+    redirect("/sign-in");
+  }
   const filter = await loadSearchParams(filterParams);
   // TODO protected page
   const queryClient = getQueryClient();
