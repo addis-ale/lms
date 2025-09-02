@@ -26,8 +26,8 @@ const CourseCard = ({
   return (
     <Link href={`/courses/${id}`}>
       <div className="group hover:shadow-sm overflow-hidden transition border rounded-lg p-3 ">
-        <div className="relative w-full aspect-video rounded-md overflow-hidden">
-          <Image src={imageUrl} alt={title} fill />
+        <div className="relative aspect-video rounded-md overflow-hidden">
+          <Image src={imageUrl} alt={title} width={500} height={400} />
         </div>
         <div className="flex flex-col pt-2">
           <div className="text-lg md:text-base font-medium group-hover:text-sky-700 transition line-clamp-2">
