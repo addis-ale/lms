@@ -1,6 +1,3 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
@@ -12,12 +9,6 @@ interface Props {
 }
 
 const ChapterDetailPage = async ({ params }: Props) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    redirect("/");
-  }
   const { chapterId, courseId } = await params;
   const queryClient = getQueryClient();
   await Promise.all([
@@ -70,6 +61,7 @@ const ChapterDetailPage = async ({ params }: Props) => {
         currentChapterId: chapterId,
       })
     );
+    console.log(nextChapter);
   }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

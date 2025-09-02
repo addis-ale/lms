@@ -60,7 +60,7 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
         await queryClient.invalidateQueries(
           trpc.courses.getMyCourse.queryOptions({})
         );
-        router.push(`/teacher/courses/${data.id}`);
+        router.push(`/teacher/tcourses/${data.id}`);
         toast.success("Course Created!");
         setIsLoading(false);
       },
@@ -187,7 +187,7 @@ export const TitleForm = ({ initialData, courseId }: Props) => {
             )}
           />
           <div className="flex justify-end gap-x-4">
-            <Link href={"/teacher/courses"}>
+            <Link href={"/teacher/tcourses"}>
               <Button
                 type="button"
                 variant={"ghost"}

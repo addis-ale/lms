@@ -93,7 +93,7 @@ export const ChaptersForm = ({ initialData, courseId }: Props) => {
   };
   const router = useRouter();
   const onEdit = (id: string) => {
-    router.push(`/teacher/courses/${courseId}/chapters/${id}`);
+    router.push(`/teacher/tcourses/${courseId}/tchapters/${id}`);
   };
   return (
     <div className="relative bg-blue-400/10 p-3 ">

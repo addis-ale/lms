@@ -4,36 +4,27 @@ import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 interface Props {
   params: Promise<{
-    courseId: string;
-    chapterId: string;
+    tcourseId: string;
+    tchapterId: string;
   }>;
 }
 
 const ChapterIdPage = async ({ params }: Props) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    redirect("/sign-in");
-  }
   const queryClient = getQueryClient();
-  const { courseId, chapterId } = await params;
+  const { tcourseId, tchapterId } = await params;
   await Promise.all([
     void queryClient.prefetchQuery(
       trpc.chapters.getOne.queryOptions({
-        id: chapterId,
-        courseId: courseId,
+        id: tchapterId,
+        courseId: tcourseId,
       })
     ),
     void queryClient.prefetchQuery(
       trpc.chapters.getMux.queryOptions({
-        chapterId,
+        chapterId: tchapterId,
       })
     ),
   ]);
@@ -42,12 +33,12 @@ const ChapterIdPage = async ({ params }: Props) => {
     <>
       <BackLink
         label="Back to course setup"
-        href={`/teacher/courses/${courseId}`}
+        href={`/teacher/tcourses/${tcourseId}`}
       />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<p>loading</p>}>
           <ErrorBoundary fallback={<p>error</p>}>
-            <ChapterIdView courseId={courseId} chapterId={chapterId} />
+            <ChapterIdView courseId={tcourseId} chapterId={tchapterId} />
           </ErrorBoundary>
         </Suspense>
       </HydrationBoundary>

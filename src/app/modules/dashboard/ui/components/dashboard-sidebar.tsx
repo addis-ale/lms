@@ -27,14 +27,14 @@ const guestRoute = [
   {
     icon: Compass,
     label: "Browse",
-    href: "/browse",
+    href: "/search",
   },
 ];
 const teacherRoute = [
   {
     icon: List,
     label: "Courses",
-    href: "/teacher/courses",
+    href: "/teacher/tcourses",
   },
   {
     icon: BarChart,

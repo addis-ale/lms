@@ -34,7 +34,7 @@ export const DashboardUserButton = () => {
   const router = useRouter();
   const pathName = usePathname();
   const isTeacherPage = pathName.startsWith("/teacher");
-  const isPlayerPage = pathName.includes("/chapter");
+  const isPlayerPage = pathName.includes("/tchapter");
   const isMobile = useIsMobile();
   const { data, isPending } = authClient.useSession();
   const onLogout = () => {
@@ -101,7 +101,7 @@ export const DashboardUserButton = () => {
                 </Button>
               </Link>
             ) : (
-              <Link href={"/teacher/courses"}>
+              <Link href={"/teacher/tcourses"}>
                 <Button>
                   <GraduationCap className="size-4 text-black" />
                   Teacher Mode
@@ -164,7 +164,7 @@ export const DashboardUserButton = () => {
             className="cursor-pointer flex items-center justify-between"
             asChild
           >
-            <Link href={"/teacher/courses"}>
+            <Link href={"/teacher/tcourses"}>
               Teacher Mode
               <GraduationCap />
             </Link>

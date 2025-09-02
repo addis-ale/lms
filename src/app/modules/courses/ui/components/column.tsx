@@ -89,7 +89,7 @@ export const columns: ColumnDef<MyCourseGetMany[number]>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <Link href={`/teacher/courses/${id}`}>
+            <Link href={`/teacher/tcourses/${id}`}>
               <DropdownMenuItem>
                 <Pencil /> Edit
               </DropdownMenuItem>
