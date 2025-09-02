@@ -1,23 +1,26 @@
 "use client";
+
 import { SearchIcon } from "lucide-react";
 import { Input } from "./ui/input";
 import { useFilter } from "@/hooks/use-filter";
 import { useEffect, useState } from "react";
-
 import { cn } from "@/lib/utils";
 
 export const SearchInput = () => {
-  const [{ search }, setSearch] = useFilter();
+  const [{ search }, setSearch] = useFilter(); // Nuqs query state
   const [value, setValue] = useState(search);
+
+  // Sync local input with global state if updated externally
   useEffect(() => {
     setValue(search);
   }, [search]);
-  useEffect(() => {
-    const timeout = setTimeout(() => {
+  // Update immediately on Enter key
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
       setSearch({ search: value });
-    }, 400);
-    return () => clearTimeout(timeout);
-  }, [value, setSearch]);
+    }
+  };
+
   return (
     <div className="relative">
       <SearchIcon className="size-4 absolute top-3 left-3 text-shadow-slate-600" />
@@ -29,6 +32,7 @@ export const SearchInput = () => {
         placeholder="Search for a course..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
     </div>
   );

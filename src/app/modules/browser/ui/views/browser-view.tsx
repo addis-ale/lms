@@ -18,8 +18,9 @@ export const BrowserView = () => {
     })
   );
   return (
-    <div className="mt-8 p-6 w-full space-y-4 md:space-y-6">
+    <div className="mt-2 p-6 w-full space-y-4 md:space-y-6">
       <Categories categories={categories} />
+
       <CoursesList items={myCourses} />
     </div>
   );
