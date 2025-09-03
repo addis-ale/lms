@@ -45,8 +45,8 @@ export const ChapterDetailView = ({
   const { data: attachments } = useSuspenseQuery(
     trpc.attachments.getMany.queryOptions({ courseId })
   );
-  const isLocked = !chapter.isFree || course.isPurchased;
-
+  const isLocked = !chapter.isFree && !course.isPurchased;
+  console.log("Is locked", course);
   const completeOnEnd = course.isPurchased && !userProgress?.isCompleted;
 
   return (
