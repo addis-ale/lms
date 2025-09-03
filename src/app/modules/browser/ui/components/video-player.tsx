@@ -1,8 +1,13 @@
 "use client";
+import { fireConfetti } from "@/lib/confettii";
 import { cn } from "@/lib/utils";
+import { useTRPC } from "@/trpc/client";
 import MuxPlayer from "@mux/mux-player-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 interface Props {
   playbackId: string;
   courseId: string;
@@ -22,6 +27,46 @@ export const VideoPlayer = ({
   title,
 }: Props) => {
   const [isReady, setIsReady] = useState(false);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const updateProgress = useMutation(
+    trpc.chapters.updateProgress.mutationOptions({
+      onSuccess: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries(
+            trpc.courses.getOne.queryOptions({ id: courseId })
+          ),
+          queryClient.invalidateQueries(
+            trpc.browseCourse.getOne.queryOptions({
+              id: courseId,
+            })
+          ),
+          queryClient.invalidateQueries(
+            trpc.browseCourse.getMany.queryOptions({})
+          ),
+        ]);
+        if (!nextChapterId) {
+          fireConfetti();
+        }
+        toast.success("progress updated");
+        if (nextChapterId) {
+          router.push(`/courses/${courseId}/chapters/${nextChapterId}`);
+        }
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    })
+  );
+  const onEnd = async () => {
+    if (completeOnEnd) {
+      updateProgress.mutate({
+        chapterId,
+        isCompleted: true,
+      });
+    }
+  };
   return (
     <div className="relative aspect-video">
       {!isReady && !isLocked && (
@@ -40,7 +85,7 @@ export const VideoPlayer = ({
           title={title}
           className={cn(!isReady && "hidden")}
           onCanPlay={() => setIsReady(true)}
-          onEnded={() => {}}
+          onEnded={onEnd}
           autoPlay
           playbackId={playbackId}
         />

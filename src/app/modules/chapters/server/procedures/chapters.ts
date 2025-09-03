@@ -111,6 +111,31 @@ export const chaptersRoute = createTRPCRouter({
         );
       return myProgress ?? { percentage: 0, lastWatchedAt: null };
     }),
+  updateProgress: protectedProcedure
+    .input(
+      z.object({
+        chapterId: z.string(),
+        isCompleted: z.boolean(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const [updatedProgress] = await db
+        .insert(userProgress)
+        .values({
+          chapterId: input.chapterId,
+          isCompleted: input.isCompleted,
+          userId: ctx.auth.user.id,
+        })
+        .onConflictDoUpdate({
+          target: [userProgress.chapterId, userProgress.userId],
+          set: {
+            isCompleted: input.isCompleted,
+          },
+        })
+
+        .returning();
+      return updatedProgress;
+    }),
   getNext: baseProcedure
     .input(
       z.object({
