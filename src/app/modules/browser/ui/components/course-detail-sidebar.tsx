@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Lock, PlayCircle } from "lucide-react";
+import { CourseProgress } from "@/components/course-progress";
 interface Props {
   courseId: string;
 }
@@ -49,7 +50,11 @@ export const CourseSidebar = ({ courseId }: Props) => {
         <div className="px-4 py-2 ">
           <Separator className="opacity-10 text-[#5D6868]" />
         </div>
-        {/* TODO: check purchase and add progress */}
+        {isPurchased && (
+          <div className="mt-10">
+            <CourseProgress variant="success" value={course.progressCount} />
+          </div>
+        )}
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent>
