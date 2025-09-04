@@ -4,6 +4,8 @@ import { useTRPC } from "@/trpc/client";
 import { Categories } from "../components/categories";
 import { useFilter } from "@/hooks/use-filter";
 import CoursesList from "@/components/courses-list";
+import { LoadingState } from "@/components/loading-state";
+import { ErrorState } from "@/components/error-state";
 
 export const BrowserView = () => {
   const [filter] = useFilter();
@@ -23,5 +25,21 @@ export const BrowserView = () => {
 
       <CoursesList items={myCourses} />
     </div>
+  );
+};
+export const BrowserViewLoading = () => {
+  return (
+    <LoadingState
+      title="Loading Courses"
+      description="This may take a few seconds"
+    />
+  );
+};
+export const BrowserViewError = () => {
+  return (
+    <ErrorState
+      title="Error Loading Courses"
+      description="Something went wrong please try again..."
+    />
   );
 };

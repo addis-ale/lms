@@ -17,6 +17,8 @@ import { ChapterVideoForm } from "../components/chapter-video-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "../components/chapter-actions";
 import { useConfirm } from "@/hooks/use-confirm";
+import { LoadingState } from "@/components/loading-state";
+import { ErrorState } from "@/components/error-state";
 
 interface Props {
   courseId: string;
@@ -193,5 +195,21 @@ export const ChapterIdView = ({ chapterId, courseId }: Props) => {
         </div>
       </div>
     </>
+  );
+};
+export const ChapterIdViewLoading = () => {
+  return (
+    <LoadingState
+      title="Loading chapter"
+      description="This may take a few seconds"
+    />
+  );
+};
+export const ChapterIdViewError = () => {
+  return (
+    <ErrorState
+      title="Error Loading chapter"
+      description="Something went wrong please try again..."
+    />
   );
 };

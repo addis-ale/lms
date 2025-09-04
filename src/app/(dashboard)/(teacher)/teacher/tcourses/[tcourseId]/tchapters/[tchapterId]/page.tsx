@@ -1,5 +1,9 @@
 import { BackLink } from "@/components/back-link";
-import { ChapterIdView } from "@/app/modules/chapters/ui/views/chapter-id-view";
+import {
+  ChapterIdView,
+  ChapterIdViewError,
+  ChapterIdViewLoading,
+} from "@/app/modules/chapters/ui/views/chapter-id-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
@@ -36,8 +40,8 @@ const ChapterIdPage = async ({ params }: Props) => {
         href={`/teacher/tcourses/${tcourseId}`}
       />
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<p>loading</p>}>
-          <ErrorBoundary fallback={<p>error</p>}>
+        <Suspense fallback={<ChapterIdViewLoading />}>
+          <ErrorBoundary fallback={<ChapterIdViewError />}>
             <ChapterIdView courseId={tcourseId} chapterId={tchapterId} />
           </ErrorBoundary>
         </Suspense>

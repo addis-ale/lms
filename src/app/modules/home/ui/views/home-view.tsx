@@ -4,6 +4,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import CoursesList from "../components/dashboard-course-list";
 import { CheckCircle, Clock } from "lucide-react";
 import { InfoCard } from "../components/info-card";
+import { LoadingState } from "@/components/loading-state";
+import { ErrorState } from "@/components/error-state";
 
 export const HomeView = () => {
   const trpc = useTRPC();
@@ -46,5 +48,21 @@ export const HomeView = () => {
         }}
       />
     </div>
+  );
+};
+export const HomeViewLoading = () => {
+  return (
+    <LoadingState
+      title="Loading Courses"
+      description="This may take a few seconds"
+    />
+  );
+};
+export const HomeViewError = () => {
+  return (
+    <ErrorState
+      title="Error Loading Courses"
+      description="Something went wrong please try again..."
+    />
   );
 };

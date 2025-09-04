@@ -7,6 +7,8 @@ import { useTRPC } from "@/trpc/client";
 import { EmptyState } from "@/components/empty-state";
 import { DataPagination } from "@/components/data-pagination";
 import { useMyCourseFilter } from "../../hooks/use-course-filter";
+import { LoadingState } from "@/components/loading-state";
+import { ErrorState } from "@/components/error-state";
 
 export const CourseView = () => {
   const trpc = useTRPC();
@@ -25,9 +27,25 @@ export const CourseView = () => {
       {myCourses.items.length === 0 && (
         <EmptyState
           title="Create your first course"
-          description="Create a course"
+          description="You don’t have any courses yet. Start by creating your first course and begin sharing your knowledge."
         />
       )}
     </div>
+  );
+};
+export const CourseViewLoading = () => {
+  return (
+    <LoadingState
+      title="Loading Courses"
+      description="This may take a few seconds"
+    />
+  );
+};
+export const CourseViewError = () => {
+  return (
+    <ErrorState
+      title="Error Loading Courses"
+      description="Something went wrong please try again..."
+    />
   );
 };
