@@ -29,8 +29,11 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { isTeacher } from "@/lib/teacher";
 
 export const DashboardUserButton = () => {
+  const { data: session } = authClient.useSession();
+
   const router = useRouter();
   const pathName = usePathname();
   const isTeacherPage = pathName.startsWith("/teacher");
@@ -41,7 +44,7 @@ export const DashboardUserButton = () => {
     authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/");
+          router.push("/sign-in");
         },
       },
     });
@@ -93,21 +96,23 @@ export const DashboardUserButton = () => {
             <DrawerDescription>{data.user.email}</DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
-            {isTeacherPage || isPlayerPage ? (
-              <Link href={"/"} className="w-full">
-                <Button className="w-full">
-                  <BookOpen className="size-4 text-white" />
-                  Student Mode
-                </Button>
-              </Link>
-            ) : (
-              <Link href={"/teacher/tcourses"} className="w-full">
-                <Button className="w-full">
-                  <GraduationCap className="size-4 text-white" />
-                  Teacher Mode
-                </Button>
-              </Link>
-            )}
+            {isTeacher(session?.user.id ?? null) ? (
+              isTeacherPage || isPlayerPage ? (
+                <Link href={"/"} className="w-full">
+                  <Button className="w-full">
+                    <BookOpen className="size-4 text-black" />
+                    Student Mode
+                  </Button>
+                </Link>
+              ) : (
+                <Link href={"/teacher/tcourses"} className="w-full">
+                  <Button className="w-full">
+                    <GraduationCap className="size-4 text-white" />
+                    Teacher Mode
+                  </Button>
+                </Link>
+              )
+            ) : null}
             <Button variant={"outline"} onClick={onLogout}>
               <LogOutIcon className="size-4 text-black" />
               Exit
@@ -149,27 +154,29 @@ export const DashboardUserButton = () => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {isTeacherPage || isPlayerPage ? (
-          <DropdownMenuItem
-            className="cursor-pointer flex items-center justify-between"
-            asChild
-          >
-            <Link href={"/"}>
-              Student Mode
-              <BookOpen />
-            </Link>
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem
-            className="cursor-pointer flex items-center justify-between"
-            asChild
-          >
-            <Link href={"/teacher/tcourses"}>
-              Teacher Mode
-              <GraduationCap />
-            </Link>
-          </DropdownMenuItem>
-        )}
+        {isTeacher(session?.user.id ?? null) ? (
+          isTeacherPage || isPlayerPage ? (
+            <DropdownMenuItem
+              className="cursor-pointer flex items-center justify-between"
+              asChild
+            >
+              <Link href={"/"}>
+                Student Mode
+                <BookOpen />
+              </Link>
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem
+              className="cursor-pointer flex items-center justify-between"
+              asChild
+            >
+              <Link href={"/teacher/tcourses"}>
+                Teacher Mode
+                <GraduationCap />
+              </Link>
+            </DropdownMenuItem>
+          )
+        ) : null}
         <DropdownMenuItem
           className="cursor-pointer flex items-center justify-between"
           onClick={onLogout}
