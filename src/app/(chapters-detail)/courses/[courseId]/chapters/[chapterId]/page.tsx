@@ -55,13 +55,13 @@ const ChapterDetailPage = async ({ params }: Props) => {
         })
       ),
     ]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const nextChapter = await queryClient.fetchQuery(
       trpc.chapters.getNext.queryOptions({
         courseId,
         currentChapterId: chapterId,
       })
     );
-    console.log(nextChapter);
   }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
