@@ -10,7 +10,7 @@ interface Props {
 
 const Page = async ({ params }: Props) => {
   const { tcourseId } = await params;
-  console.log("courseId", tcourseId);
+
   const queryClient = getQueryClient();
   await Promise.all([
     void queryClient.prefetchQuery(
