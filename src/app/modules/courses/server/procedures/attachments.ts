@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { attachments, courses } from "@/db/schema";
+import { isTeacher } from "@/lib/teacher";
 import {
   baseProcedure,
   createTRPCRouter,
@@ -19,6 +20,12 @@ export const attachmentsRoute = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      if (!isTeacher(ctx.auth.user.id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Only Teacher can create courses",
+        });
+      }
       const [course] = await db
         .select({
           userId: courses.userId,

@@ -2,7 +2,11 @@ import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { ChapterDetailView } from "@/app/modules/browser/ui/views/chapter-detail-view";
+import {
+  ChapterDetailView,
+  ChapterDetailViewError,
+  ChapterDetailViewLoading,
+} from "@/app/modules/browser/ui/views/chapter-detail-view";
 
 interface Props {
   params: Promise<{ courseId: string; chapterId: string }>;
@@ -65,8 +69,8 @@ const ChapterDetailPage = async ({ params }: Props) => {
   }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={<p>loading</p>}>
-        <ErrorBoundary fallback={<p>error</p>}>
+      <Suspense fallback={<ChapterDetailViewLoading />}>
+        <ErrorBoundary fallback={<ChapterDetailViewError />}>
           <ChapterDetailView courseId={courseId} chapterId={chapterId} />
         </ErrorBoundary>
       </Suspense>

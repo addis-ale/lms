@@ -28,6 +28,8 @@ import { Banner } from "@/components/banner";
 import { ChapterActions } from "@/app/modules/chapters/ui/components/chapter-actions";
 import { useConfirm } from "@/hooks/use-confirm";
 import { fireConfetti } from "@/lib/confettii";
+import { LoadingState } from "@/components/loading-state";
+import { ErrorState } from "@/components/error-state";
 
 interface Props {
   courseId: string;
@@ -231,5 +233,21 @@ export const CourseIdView = ({ courseId }: Props) => {
         </div>
       </div>
     </>
+  );
+};
+export const CourseIdViewLoading = () => {
+  return (
+    <LoadingState
+      title="Loading course"
+      description="This may take a few seconds"
+    />
+  );
+};
+export const CourseIdViewError = () => {
+  return (
+    <ErrorState
+      title="Error Loading course"
+      description="Something went wrong please try again..."
+    />
   );
 };

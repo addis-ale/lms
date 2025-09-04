@@ -94,16 +94,16 @@ export const DashboardUserButton = () => {
           </DrawerHeader>
           <DrawerFooter>
             {isTeacherPage || isPlayerPage ? (
-              <Link href={"/"}>
-                <Button>
-                  <BookOpen className="size-4 text-black" />
+              <Link href={"/"} className="w-full">
+                <Button className="w-full">
+                  <BookOpen className="size-4 text-white" />
                   Student Mode
                 </Button>
               </Link>
             ) : (
-              <Link href={"/teacher/tcourses"}>
-                <Button>
-                  <GraduationCap className="size-4 text-black" />
+              <Link href={"/teacher/tcourses"} className="w-full">
+                <Button className="w-full">
+                  <GraduationCap className="size-4 text-white" />
                   Teacher Mode
                 </Button>
               </Link>

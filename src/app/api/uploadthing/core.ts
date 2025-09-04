@@ -1,7 +1,8 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import { auth } from "@/lib/auth";
+import { isTeacher } from "@/lib/teacher";
 
 const f = createUploadthing();
 
@@ -18,7 +19,8 @@ export const ourFileRouter = {
         headers: await headers(),
       });
       const user = session?.user;
-      if (!user) throw new UploadThingError("Unauthorized");
+      const isAuthorized = isTeacher(user?.id ?? null);
+      if (!user || !isAuthorized) throw new UploadThingError("Unauthorized");
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {

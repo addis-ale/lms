@@ -1,7 +1,11 @@
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { CourseIdView } from "@/app/modules/courses/ui/views/course-id-view";
+import {
+  CourseIdView,
+  CourseIdViewError,
+  CourseIdViewLoading,
+} from "@/app/modules/courses/ui/views/course-id-view";
 import { BackLink } from "@/components/back-link";
 import { getQueryClient, trpc } from "@/trpc/server";
 interface Props {
@@ -29,8 +33,8 @@ const Page = async ({ params }: Props) => {
     <>
       <BackLink href="/teacher/tcourses" label="Back to my courses" />
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<p>Loading</p>}>
-          <ErrorBoundary fallback={<p>error</p>}>
+        <Suspense fallback={<CourseIdViewLoading />}>
+          <ErrorBoundary fallback={<CourseIdViewError />}>
             <CourseIdView courseId={tcourseId} />
           </ErrorBoundary>
         </Suspense>
