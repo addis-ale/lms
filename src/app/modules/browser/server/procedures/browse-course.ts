@@ -10,7 +10,7 @@ import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, asc, count, desc, eq, ilike, inArray } from "drizzle-orm";
 import { z } from "zod";
-const getProgress = async (userId: string, courseId: string) => {
+export const getProgress = async (userId: string, courseId: string) => {
   const publishedChapters = await db
     .select({ id: chapters.id })
     .from(chapters)
