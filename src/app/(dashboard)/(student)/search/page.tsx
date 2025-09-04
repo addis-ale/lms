@@ -1,7 +1,6 @@
-// src/app/(dashboard)/(student)/search/page.tsx
-
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
+import { SearchParams } from "nuqs";
 import { ErrorBoundary } from "react-error-boundary";
 import {
   BrowserView,
@@ -11,24 +10,22 @@ import {
 import { getQueryClient, trpc } from "@/trpc/server";
 import { loadSearchParams } from "@/lib/params";
 
-export default async function BrowsePage({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
-  const filter = loadSearchParams(searchParams); // let your util parse it
+type PageProps = {
+  searchParams: Promise<SearchParams>;
+};
+const BrowsePage = async ({ searchParams }: PageProps) => {
+  const { search, category } = await loadSearchParams(searchParams);
 
   const queryClient = getQueryClient();
   await Promise.all([
-    queryClient.prefetchQuery(trpc.categories.getMany.queryOptions()),
-    queryClient.prefetchQuery(
+    void queryClient.prefetchQuery(trpc.categories.getMany.queryOptions()),
+    void queryClient.prefetchQuery(
       trpc.browseCourse.getMany.queryOptions({
-        search: filter.search,
-        categoryId: filter.category,
+        search: search,
+        categoryId: category,
       })
     ),
   ]);
-
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Suspense fallback={<BrowserViewLoading />}>
@@ -38,4 +35,6 @@ export default async function BrowsePage({
       </Suspense>
     </HydrationBoundary>
   );
-}
+};
+
+export default BrowsePage;
