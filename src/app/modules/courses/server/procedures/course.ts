@@ -21,6 +21,7 @@ import {
   MAX_PAGE_SIZE,
   MIN_PAGE_SIZE,
 } from "@/constants";
+import { isTeacher } from "@/lib/teacher";
 
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID!,
@@ -30,6 +31,12 @@ export const coursesRoute = createTRPCRouter({
   create: protectedProcedure
     .input(titleInsertSchema)
     .mutation(async ({ input, ctx }) => {
+      if (!isTeacher(ctx.auth.user.id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Only Teacher can create courses",
+        });
+      }
       const [createdCourse] = await db
         .insert(courses)
         .values({

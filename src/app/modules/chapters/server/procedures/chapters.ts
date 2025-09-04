@@ -9,6 +9,7 @@ import {
 } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { Mux } from "@mux/mux-node";
+import { isTeacher } from "@/lib/teacher";
 
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID!,
@@ -23,6 +24,12 @@ export const chaptersRoute = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      if (!isTeacher(ctx.auth.user.id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Only Teacher can create courses",
+        });
+      }
       const [course] = await db
         .select({
           userId: courses.userId,
