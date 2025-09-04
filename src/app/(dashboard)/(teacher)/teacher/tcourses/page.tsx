@@ -2,7 +2,11 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { SearchParams } from "nuqs";
-import { CourseView } from "@/app/modules/courses/ui/views/courses-view";
+import {
+  CourseView,
+  CourseViewError,
+  CourseViewLoading,
+} from "@/app/modules/courses/ui/views/courses-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { loadSearchParams } from "@/app/modules/courses/params";
 interface Props {
@@ -17,8 +21,8 @@ const CoursePage = async ({ searchParams }: Props) => {
   return (
     <>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<p>Loaing</p>}>
-          <ErrorBoundary fallback={<p>error</p>}>
+        <Suspense fallback={<CourseViewLoading />}>
+          <ErrorBoundary fallback={<CourseViewError />}>
             <CourseView />
           </ErrorBoundary>
         </Suspense>

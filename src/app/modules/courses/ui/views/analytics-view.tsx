@@ -4,6 +4,8 @@ import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { DataCard } from "../components/data-card";
 import { Chart } from "../components/chart";
+import { LoadingState } from "@/components/loading-state";
+import { ErrorState } from "@/components/error-state";
 
 export const AnalyticsView = () => {
   const trpc = useTRPC();
@@ -23,5 +25,21 @@ export const AnalyticsView = () => {
       </div>
       <Chart data={myAnalytics.data} />
     </div>
+  );
+};
+export const AnalyticsViewLoading = () => {
+  return (
+    <LoadingState
+      title="Loading analytics"
+      description="This may take a few seconds"
+    />
+  );
+};
+export const AnalyticsViewError = () => {
+  return (
+    <ErrorState
+      title="Error Loading analytics"
+      description="Something went wrong please try again..."
+    />
   );
 };

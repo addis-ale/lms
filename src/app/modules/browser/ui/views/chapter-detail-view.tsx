@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
 import { CourseProgressButton } from "../components/course-progress-button";
+import { LoadingState } from "@/components/loading-state";
+import { ErrorState } from "@/components/error-state";
 
 export const ChapterDetailView = ({
   chapterId,
@@ -120,5 +122,21 @@ export const ChapterDetailView = ({
         </div>
       </div>
     </div>
+  );
+};
+export const ChapterDetailViewLoading = () => {
+  return (
+    <LoadingState
+      title="Loading chapter"
+      description="This may take a few seconds"
+    />
+  );
+};
+export const ChapterDetailViewError = () => {
+  return (
+    <ErrorState
+      title="Error Loading chapter"
+      description="Something went wrong please try again..."
+    />
   );
 };
