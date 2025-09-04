@@ -6,6 +6,7 @@ import { categoriesRoute } from "@/app/modules/courses/server/procedures/categor
 import { browseCourseRoute } from "@/app/modules/browser/server/procedures/browse-course";
 import { paymentRoute } from "@/app/modules/courses/server/procedures/payment";
 import { dashboardCoursesRoute } from "@/app/modules/home/server/procedures/dashboard-course";
+import { analyticsRoute } from "@/app/modules/courses/server/procedures/analytics";
 
 export const appRouter = createTRPCRouter({
   courses: coursesRoute,
@@ -15,6 +16,7 @@ export const appRouter = createTRPCRouter({
   browseCourse: browseCourseRoute,
   payment: paymentRoute,
   dashboardCourse: dashboardCoursesRoute,
+  analytics: analyticsRoute,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;
