@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { SearchParams } from "nuqs";
+import { SearchParams } from "nuqs/server";
 import { ErrorBoundary } from "react-error-boundary";
 import {
   BrowserView,
