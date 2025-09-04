@@ -11,11 +11,11 @@ import { getQueryClient, trpc } from "@/trpc/server";
 import { loadSearchParams } from "@/lib/params";
 
 interface Props {
-  filterParams: Promise<SearchParams>;
+  searchParams: SearchParams;
 }
-const BrowsePage = async ({ filterParams }: Props) => {
-  const filter = await loadSearchParams(filterParams);
-  // TODO protected page
+const BrowsePage = async ({ searchParams }: Props) => {
+  const filter = loadSearchParams(searchParams);
+
   const queryClient = getQueryClient();
   await Promise.all([
     void queryClient.prefetchQuery(trpc.categories.getMany.queryOptions()),
