@@ -84,7 +84,7 @@ export const SignUpView = () => {
       {
         name: data.name,
         email: data.email,
-        password: data.email,
+        password: data.password,
         callbackURL: "/",
       },
       {
