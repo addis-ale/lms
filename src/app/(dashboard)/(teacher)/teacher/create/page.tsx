@@ -4,7 +4,7 @@ import { BackLink } from "@/components/back-link";
 const Createpage = async () => {
   return (
     <>
-      <BackLink href="/teacher/courses" label="Back to my courses" />
+      <BackLink href="/teacher/tcourses" label="Back to my courses" />
       <CreateCourseView />
     </>
   );
